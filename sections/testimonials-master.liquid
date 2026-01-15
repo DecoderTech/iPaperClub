@@ -1,0 +1,198 @@
+{% comment %}
+  Section: Testimonials Master
+  Layout inspirado em 3 cards de depoimentos com título e estrelas no topo.
+{% endcomment %}
+
+<section id="section-{{ section.id }}" class="tm-master">
+  <div class="tm-master__inner page-width">
+    {% if section.settings.show_stars %}
+      <div class="tm-master__stars-top">
+        {% for i in (1..5) %}
+          ★
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if section.settings.heading != blank %}
+      <h2 class="tm-master__heading">
+        {{ section.settings.heading }}
+      </h2>
+    {% endif %}
+
+    <div class="tm-master__grid">
+      {% for block in section.blocks %}
+        <article class="tm-master__card" {{ block.shopify_attributes }}>
+          {% if block.settings.show_stars %}
+            <div class="tm-master__stars-card">
+              {% for i in (1..block.settings.rating) %}
+                ★
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if block.settings.title != blank %}
+            <h3 class="tm-master__title">
+              {{ block.settings.title }}
+            </h3>
+          {% endif %}
+
+          {% if block.settings.text != blank %}
+            <p class="tm-master__text">
+              {{ block.settings.text }}
+            </p>
+          {% endif %}
+
+          {% if block.settings.name != blank %}
+            <p class="tm-master__name">
+              {{ block.settings.name }}
+            </p>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  #section-{{ section.id }}.tm-master {
+    background: #f5f5f5; /* cinza claro, igual referência */
+    padding: 60px 0 80px;
+  }
+
+  #section-{{ section.id }} .tm-master__inner {
+    text-align: center;
+  }
+
+  #section-{{ section.id }} .tm-master__stars-top {
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+
+  #section-{{ section.id }} .tm-master__heading {
+    font-size: 32px;
+    font-weight: 700;
+    text-decoration: underline;
+    margin: 0 0 40px;
+  }
+
+  #section-{{ section.id }} .tm-master__grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #section-{{ section.id }} .tm-master__card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 32px 30px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    border: 1px solid #e5e5e5;
+  }
+
+  #section-{{ section.id }} .tm-master__stars-card {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  #section-{{ section.id }} .tm-master__title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 14px;
+  }
+
+  #section-{{ section.id }} .tm-master__text {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  #section-{{ section.id }} .tm-master__name {
+    font-size: 14px;
+    font-style: italic;
+    margin: 0;
+  }
+
+  @media screen and (max-width: 989px) {
+    #section-{{ section.id }} .tm-master__grid {
+      grid-template-columns: 1fr;
+    }
+
+    #section-{{ section.id }} .tm-master__heading {
+      font-size: 26px;
+      padding: 0 10px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Testimonials Master",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_stars",
+      "label": "Mostrar estrelas no topo",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "150,000+ homes saved from boring walls"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Depoimento",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_stars",
+          "label": "Mostrar estrelas neste card",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Estrelas",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título do depoimento",
+          "default": "Quality better than expected"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Texto",
+          "default": "I was really blown away by both the quality of the paper and the frame for this price. I didn't have super high expectations, so it was a nice surprise :)"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Nome do cliente",
+          "default": "Eve S"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Testimonials Master",
+      "category": "Testimonials",
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}
