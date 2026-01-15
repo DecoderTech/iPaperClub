@@ -4287,10 +4287,8 @@ text-component {
   }
 }
 
-/* 2 colunas no mobile para grades de produtos */
+/* 2 colunas no mobile apenas para grades de produtos */
 @media screen and (max-width: 749px) {
-  .collection .grid,
-  .template-collection .grid,
   .product-grid,
   .grid--products,
   .grid.grid--uniform {
