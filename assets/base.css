@@ -1001,11 +1001,20 @@ summary::-webkit-details-marker {
 }
 
 [product-grid-view='default'] {
-  --product-grid-gap: 16px;
+  --product-grid-gap: 20px;
   --padding-block-start: 24px;
   --padding-block-end: 24px;
   --padding-inline-start: 0px;
   --padding-inline-end: 0px;
+}
+
+ul[product-grid-view='default'].product-grid {
+  margin-inline: var(--product-grid-gap);
+  margin-block: var(--product-grid-gap);
+}
+
+body.collection-quadros ul[product-grid-view='default'].product-grid {
+  margin-block-start: 0;
 }
 
 [product-grid-view='default'] .product-grid__item {
@@ -1030,6 +1039,10 @@ ul[product-grid-view='zoom-out'] .product-grid__card > * {
 }
 
 ul[product-grid-view='zoom-out'] .product-grid__card .card-gallery {
+  display: block;
+}
+
+ul[product-grid-view='zoom-out'] .product-grid__card > .frame-preview--card {
   display: block;
 }
 

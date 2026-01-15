@@ -20,7 +20,71 @@
   {% endunless %}
 {% endcapture %}
 
-{% render 'card-gallery', children: children, has_applied_colour_filter: has_applied_colour_filter %}
+{% liquid
+  assign is_frame_product = false
+  
+  # Check product type
+  if closest.product.type contains 'Quadro' or closest.product.type contains 'quadro'
+    assign is_frame_product = true
+  endif
+
+  # Check tags
+  unless is_frame_product
+    for tag in closest.product.tags
+      assign tag_down = tag | downcase
+      if tag_down contains 'quadro'
+        assign is_frame_product = true
+        break
+      endif
+    endfor
+  endunless
+
+  # Check options (like in PDP)
+  unless is_frame_product
+    for option in closest.product.options_with_values
+      assign option_name = option.name | downcase
+      if option_name contains 'moldura'
+        assign is_frame_product = true
+        break
+      endif
+      
+      for value in option.values
+        assign value_down = value | downcase
+        if value_down contains 'preta' or value_down contains 'branca' or value_down contains 'madeira'
+          assign is_frame_product = true
+          break
+        endif
+      endfor
+      if is_frame_product
+        break
+      endif
+    endfor
+  endunless
+%}
+
+{% if is_frame_product %}
+  {% liquid
+    assign target_media = closest.product.featured_media
+    if target_media == blank and closest.product.media.size > 0
+      assign target_media = closest.product.media.first
+    endif
+  %}
+  {% if target_media != blank %}
+    <div class="frame-preview frame-preview--white frame-preview--card">
+      <div class="frame-preview__inner">
+        {% render 'product-media', media: target_media, preview_image_only: true, loading: 'lazy' %}
+      </div>
+      <img
+        class="frame-preview__frame-image"
+        src="https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538"
+        alt=""
+        loading="lazy"
+      >
+    </div>
+  {% endif %}
+{% else %}
+  {% render 'card-gallery', children: children, has_applied_colour_filter: has_applied_colour_filter %}
+{% endif %}
 
 {% # Title and price for the zoomed out grid view %}
 <div class="product-grid-view-zoom-out--details">
@@ -35,6 +99,80 @@
     </div>
   {% endif %}
 </div>
+
+{% stylesheet %}
+  .frame-preview--card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #ffffff;
+  }
+
+  /* Aspect ratio fix for frames */
+  .frame-preview--card.frame-preview--ratio {
+    aspect-ratio: 0.707; /* Approx 1:1.414 (A series) or 5:7 */
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .frame-preview--card .frame-preview__inner {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 5.45% 11.25%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .frame-preview--card .frame-preview__inner .product-media {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    aspect-ratio: auto;
+  }
+
+  .frame-preview--card .frame-preview__inner .product-media__image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .frame-preview--card .frame-preview__frame-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    object-fit: contain;
+  }
+
+  @media screen and (max-width: 749px) {
+    .product-grid__card .frame-preview--card {
+      height: 260px;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .product-grid__card .frame-preview--card {
+      height: 340px;
+    }
+
+    .frame-preview--card .frame-preview__inner .product-media {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .frame-preview--card .frame-preview__inner .product-media__image {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {

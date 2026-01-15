@@ -1,0 +1,160 @@
+{% comment %}
+  Frame Selector Snippet
+  Allows users to switch between frame colors on collection pages.
+{% endcomment %}
+
+{% liquid
+  assign show_selector = false
+  if collection.handle == 'quadros'
+    assign show_selector = true
+  elsif collection.products.first.type contains 'Quadro'
+    assign show_selector = true
+  else
+    for product in collection.products limit: 5
+      if product.tags contains 'quadro' or product.type contains 'Quadro'
+        assign show_selector = true
+        break
+      endif
+    endfor
+  endif
+%}
+
+{% if show_selector %}
+  <div class="frame-selector-wrapper sticky-content">
+    <span class="frame-selector-label">Escolha a moldura:</span>
+    <div class="frame-selector-options">
+      <button class="frame-option active" data-frame="white" title="Branca" aria-label="Moldura Branca"></button>
+      <button class="frame-option" data-frame="black" title="Preta" aria-label="Moldura Preta"></button>
+      <button class="frame-option" data-frame="oak" title="Madeira" aria-label="Moldura Madeira"></button>
+    </div>
+  </div>
+
+  <style>
+    .frame-selector-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 10px 20px;
+      margin-bottom: 0;
+      background-color: var(--color-background);
+      border-top: 1px solid var(--color-background);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .frame-selector-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-foreground);
+      white-space: nowrap;
+    }
+
+    .frame-selector-wrapper.sticky-content {
+      --sticky-header-offset: calc(var(--header-height) - 3px);
+    }
+
+    .frame-selector-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Em telas maiores, o seletor ocupa a largura útil do grid de coleção */
+    @media screen and (min-width: 750px) {
+      .collection-wrapper > .frame-selector-wrapper {
+        grid-column: 1 / -1;
+        justify-content: center;
+      }
+    }
+
+    .frame-option {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.1);
+      position: relative;
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+
+    .frame-option[data-frame="white"] {
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
+    }
+
+    .frame-option[data-frame="black"] {
+      background-color: #000000;
+      border: 1px solid #000000;
+    }
+
+    .frame-option[data-frame="oak"] {
+      background-color: #d2b48c; /* Tan/Oak color */
+      background-image: linear-gradient(45deg, #d2b48c 0%, #c19a6b 100%);
+      border: 1px solid #c19a6b;
+    }
+
+    .frame-option:hover {
+      transform: scale(1.1);
+    }
+
+    .frame-option.active {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-foreground);
+    }
+
+    /* CSS Variable Override for Frame Image */
+    /* Scoped to collection template to avoid affecting Home */
+    body.template-collection.frame-selected-black .frame-preview__frame-image {
+      content: url("https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_black.png?v=1768429549");
+    }
+
+    body.template-collection.frame-selected-oak .frame-preview__frame-image {
+      content: url("https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_oak.png?v=1768429562");
+    }
+
+    body.template-collection.frame-selected-white .frame-preview__frame-image {
+      content: url("https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538");
+    }
+
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add template class to body if not present (standard Shopify practice but ensuring)
+      document.body.classList.add('template-collection');
+
+      const options = document.querySelectorAll('.frame-option');
+      
+      // Function to apply frame selection
+      function applyFrame(frame) {
+        // Update active state on buttons
+        options.forEach(opt => {
+          if (opt.dataset.frame === frame) {
+            opt.classList.add('active');
+          } else {
+            opt.classList.remove('active');
+          }
+        });
+
+        // Update body class for CSS override
+        document.body.classList.remove('frame-selected-white', 'frame-selected-black', 'frame-selected-oak');
+        document.body.classList.add(`frame-selected-${frame}`);
+
+        // Persist preference
+        localStorage.setItem('selected_frame', frame);
+      }
+
+      // Initialize with saved preference or default
+      const savedFrame = localStorage.getItem('selected_frame') || 'white';
+      applyFrame(savedFrame);
+
+      // Add click listeners
+      options.forEach(option => {
+        option.addEventListener('click', function() {
+          const frame = this.dataset.frame;
+          applyFrame(frame);
+        });
+      });
+    });
+  </script>
+{% endif %}

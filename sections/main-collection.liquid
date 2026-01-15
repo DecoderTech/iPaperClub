@@ -41,6 +41,8 @@
       results_size: collection.products_count
     %}
 
+    {% render 'frame-selector' %}
+
     {% paginate collection.products by 24 %}
       {% capture children %}
         {% for product in collection.products %}
@@ -62,6 +64,7 @@
         section: section,
         children: children,
         products: collection.products,
+        results: collection,
         paginate: paginate
       %}
     {% endpaginate %}
