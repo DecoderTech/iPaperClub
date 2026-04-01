@@ -9,6 +9,12 @@
  */
 {
   "sections": {
+    "seo_h1": {
+      "type": "seo-h1",
+      "settings": {
+        "heading": "iPaper Club | Quadros Decorativos, Planners e Stickers"
+      }
+    },
     "hero_RkimKJ": {
       "type": "hero",
       "blocks": {
@@ -950,6 +956,7 @@
     }
   },
   "order": [
+    "seo_h1",
     "hero_RkimKJ",
     "product_list_X8Q7bi",
     "1770320539cc35b1e2",
