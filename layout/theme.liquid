@@ -52,62 +52,6 @@
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
     
-    <div id="ipaperOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
-      <div style="background:#faf9f6;width:90%;max-width:480px;border-radius:2px;position:relative;overflow:hidden;">
-        <button onclick="closePopup()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:#888;">✕</button>
-        <div style="height:8px;background:#1a1a1a;"></div>
-        <div style="padding:2.5rem 2.5rem 2rem;">
-          <p style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#888;margin:0 0 0.75rem;">Bem-vinda à iPaper</p>
-          <h2 style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;line-height:1.1;color:#1a1a1a;margin:0 0 0.5rem;">10% off na<br><em>sua primeira compra</em></h2>
-          <p style="font-family:'Jost',sans-serif;font-size:13px;font-weight:300;color:#666;margin:0 0 1.75rem;">Cadastre seu e-mail e WhatsApp para receber seu cupom exclusivo.</p>
-          
-          <div id="ipFormSection">
-            {% form 'customer', id: 'ipaperContactForm' %}
-              <input type="hidden" name="contact[tags]" value="newsletter, popup_desconto">
-              
-              <input id="ipEmail" name="contact[email]" type="email" placeholder="Seu melhor e-mail" required style="width:100%;padding:12px 14px;font-family:'Jost',sans-serif;font-size:13px;border:1px solid #ddd;border-radius:1px;background:#fff;box-sizing:border-box;margin-bottom:8px;outline:none;">
-              
-              <input id="ipPhone" name="contact[phone]" type="tel" placeholder="WhatsApp (ex: 11 99999-9999)" required style="width:100%;padding:12px 14px;font-family:'Jost',sans-serif;font-size:13px;border:1px solid #ddd;border-radius:1px;background:#fff;box-sizing:border-box;margin-bottom:8px;outline:none;">
-              
-              <button type="submit" style="width:100%;padding:14px;background:#1a1a1a;color:#faf9f6;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;border:none;border-radius:1px;cursor:pointer;">Quero meu desconto</button>
-            {% endform %}
-          </div>
-
-          <div id="ipCouponBox" style="display:none;flex-direction:column;align-items:center;gap:12px;padding:1.5rem;background:#fff;border:1px dashed #ccc;text-align:center;">
-            <p style="font-family:'Jost',sans-serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#888;margin:0;">Seu cupom exclusivo</p>
-            <p style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;letter-spacing:0.08em;color:#1a1a1a;margin:0;">IPAPER10</p>
-            <p style="font-family:'Jost',sans-serif;font-size:12px;color:#666;margin:0;">Use no checkout e ganhe 10% de desconto.</p>
-          </div>
-
-          <button onclick="closePopup()" style="font-family:'Jost',sans-serif;font-size:11px;color:#aaa;text-align:center;margin-top:1rem;cursor:pointer;text-decoration:underline;background:none;border:none;width:100%;">Não, obrigada</button>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      function closePopup() {
-        document.getElementById('ipaperOverlay').style.display = 'none';
-        localStorage.setItem('ipaperPopupSeen', '1');
-      }
-
-      document.addEventListener('DOMContentLoaded', function() {
-        var form = document.getElementById('ipaperContactForm');
-        
-        // Verifica se o formulário foi enviado com sucesso (Shopify recarrega a página com #contact_form)
-        if (window.location.hash === '#ipaperContactForm' || window.location.search.includes('customer_posted=true')) {
-            document.getElementById('ipaperOverlay').style.display = 'flex';
-            document.getElementById('ipFormSection').style.display = 'none';
-            document.getElementById('ipCouponBox').style.display = 'flex';
-            localStorage.setItem('ipaperPopupSeen', '1');
-        } 
-        // Caso contrário, mostra o popup após 2 segundos se ainda não foi visto
-        else if (!localStorage.getItem('ipaperPopupSeen')) {
-          setTimeout(function() {
-            document.getElementById('ipaperOverlay').style.display = 'flex';
-          }, 2000);
-        }
-      });
-    </script>
 
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
     
