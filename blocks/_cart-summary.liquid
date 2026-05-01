@@ -16,6 +16,8 @@
     class="section-background {% if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }} inherit-parent-scheme--mobile{% endif %}"
   ></div>
 {% endif %}
+{% unless cart.empty? %}{% render 'cart-shipping-progress' %}{% endunless %}
+
 <div
   class="cart__summary-container border-style{% if block_settings.extend_summary == true %} cart__container--extend {% if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }} inherit-parent-scheme--mobile{% endif %}{% endif %}{% if block_settings.border_radius > 0 %} has-border-radius{% endif %}"
   style="{% render 'border-override', settings: block_settings %}"
