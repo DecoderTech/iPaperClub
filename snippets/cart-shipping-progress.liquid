@@ -1,0 +1,84 @@
+{%- doc -%}
+  Renders a free shipping progress bar.
+  Brand palette: verde #10413d, rosa #efc5c7.
+{%- enddoc -%}
+
+{%- liquid
+  assign frete_gratis_min = 29900
+  assign falta = frete_gratis_min | minus: cart.total_price
+  assign progresso = cart.total_price | times: 100 | divided_by: frete_gratis_min
+  if progresso > 100
+    assign progresso = 100
+  endif
+-%}
+
+<div class="cart-shipping-progress" data-cart-shipping-progress>
+  {% if cart.total_price >= frete_gratis_min %}
+    <p class="cart-shipping-progress__message cart-shipping-progress__message--success">
+      <span class="cart-shipping-progress__icon">✓</span>
+      <strong>Frete grátis aplicado</strong>
+    </p>
+  {% else %}
+    <p class="cart-shipping-progress__message">
+      Faltam <strong>{{ falta | money }}</strong> para o frete grátis
+    </p>
+  {% endif %}
+
+  <div class="cart-shipping-progress__bar">
+    <div
+      class="cart-shipping-progress__fill"
+      style="width: {{ progresso }}%;"
+    ></div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .cart-shipping-progress {
+    padding: 14px 20px;
+    background-color: var(--color-background);
+    border-bottom: 1px solid rgba(16, 65, 61, 0.1);
+  }
+
+  .cart-shipping-progress__message {
+    font-family: var(--font-body-family);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: #1a1a1a;
+    margin: 0 0 10px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .cart-shipping-progress__message strong {
+    color: #10413d;
+    font-weight: 600;
+  }
+
+  .cart-shipping-progress__message--success {
+    color: #10413d;
+    font-weight: 500;
+  }
+
+  .cart-shipping-progress__message--success strong {
+    color: #10413d;
+  }
+
+  .cart-shipping-progress__icon {
+    margin-right: 4px;
+    color: #10413d;
+    font-weight: bold;
+  }
+
+  .cart-shipping-progress__bar {
+    height: 4px;
+    background-color: #efc5c7;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .cart-shipping-progress__fill {
+    height: 100%;
+    background-color: #10413d;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+{% endstylesheet %}
