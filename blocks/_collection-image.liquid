@@ -41,7 +41,7 @@
     {{
       block_settings.collection.featured_image
       | image_url: width: 3840
-      | image_tag: preload: true, class: 'collection-image__featured-image', widths: widths, sizes: sizes
+      | image_tag: loading: 'lazy', class: 'collection-image__featured-image', widths: widths, sizes: sizes
     }}
   </div>
 {% endif %}
