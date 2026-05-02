@@ -68,7 +68,23 @@
         elsif recommendations.performed and recommendations.products_count == 0
           # No recommendations found, pull from catalog
           if section.settings.recommendation_type == 'related'
-            assign products = collections.all.products | reject: 'id', section.settings.product.id
+            # iPaper cross-sell tematico: tenta usar a colecao da familia tematica do produto
+            assign tema_collection = null
+            for tag in section.settings.product.tags
+              if tag contains 'tema-'
+                assign tema_collection = collections[tag]
+                if tema_collection != blank and tema_collection != empty
+                  break
+                else
+                  assign tema_collection = null
+                endif
+              endif
+            endfor
+            if tema_collection
+              assign products = tema_collection.products | reject: 'id', section.settings.product.id
+            else
+              assign products = collections.all.products | reject: 'id', section.settings.product.id
+            endif
           elsif section.settings.recommendation_type == 'complementary'
             # Do not recommend the All collection as complementary products
             assign products = null
