@@ -274,7 +274,9 @@
 
   .frame-preview {
     position: relative;
-    width: 100%;
+    aspect-ratio: 0.707; /* alinhado com coleção - proporção da moldura PNG */
+    max-width: 100%;
+    margin: 0 auto;
     overflow: hidden;
   }
 
@@ -312,13 +314,13 @@
 
   @media screen and (max-width: 749px) {
     .frame-preview {
-      height: 420px;
+      max-height: 420px;
     }
   }
 
   @media screen and (min-width: 750px) {
     .frame-preview {
-      height: min(calc(100vh - 160px), 640px);
+      max-height: min(calc(100vh - 160px), 640px);
     }
 
     .frame-preview__inner .product-media {
