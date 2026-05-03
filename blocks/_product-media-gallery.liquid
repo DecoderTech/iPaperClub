@@ -337,9 +337,24 @@
 
   @media screen and (min-width: 750px) {
     .product-information__media .product-media-container {
-      max-height: min(80vh, 720px);
+      max-height: min(70vh, 580px);
     }
   }
+
+  @media screen and (max-width: 749px) {
+    .product-information__media .product-media-container {
+      max-height: 70vh;
+    }
+    .product-information__media .product-media__image,
+    .product-information__media .product-media img {
+      max-height: 70vh;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      margin: 0 auto;
+    }
+  }
+
 {% endstyle %}
 
 {% liquid
