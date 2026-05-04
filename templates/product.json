@@ -19,7 +19,7 @@
             "media_presentation": "grid",
             "media_columns": "two",
             "image_gap": 1,
-            "large_first_image": true,
+            "large_first_image": false,
             "icons_style": "none",
             "slideshow_controls_style": "counter",
             "slideshow_mobile_controls_style": "dots",
@@ -33,7 +33,7 @@
             "zoom": true,
             "video_loop": false,
             "hide_variants": false,
-            "padding-block-start": 60,
+            "padding-block-start": 0,
             "padding-block-end": 0,
             "padding-inline-start": 0,
             "padding-inline-end": 0
