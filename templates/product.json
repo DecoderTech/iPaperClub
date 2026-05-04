@@ -825,7 +825,7 @@
         "max_products": 5,
         "columns": 3,
         "mobile_columns": "1",
-        "columns_gap": 1,
+        "columns_gap": 0,
         "rows_gap": 2,
         "icons_style": "arrow",
         "icons_shape": "none",

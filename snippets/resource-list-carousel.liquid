@@ -57,3 +57,12 @@
     slideshow_gutters: slideshow_gutters
   %}
 </div>
+
+{% stylesheet %}
+  /* Mobile: slide ocupa largura total da tela (evita gap cinza lateral) */
+  @media screen and (max-width: 749px) {
+    .resource-list__carousel {
+      --slide-width-max: 92vw;
+    }
+  }
+{% endstylesheet %}
