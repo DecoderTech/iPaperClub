@@ -821,7 +821,7 @@
         "product": "{{ closest.product }}",
         "recommendation_type": "related",
         "layout_type": "grid",
-        "carousel_on_mobile": false,
+        "carousel_on_mobile": true,
         "max_products": 3,
         "columns": 3,
         "mobile_columns": "1",
