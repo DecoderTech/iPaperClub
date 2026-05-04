@@ -825,6 +825,26 @@
     /* Make the height match the height of the model-viewer */
     height: 100vh;
   }
+
+  /* Mobile: forcar proporcao 3:4 tanto no frame da capa quanto nos slides de mockup */
+  @media screen and (max-width: 749px) {
+    .frame-preview {
+      aspect-ratio: 3/4;
+      max-height: none;
+    }
+    /* Aplicar 3:4 tambem nos slides sem frame (mockups em ambiente) */
+    .product-information__media .product-media-container--image:not(:has(.frame-preview)) {
+      aspect-ratio: 3/4;
+    }
+    .product-information__media .product-media-container--image:not(:has(.frame-preview)) .product-media,
+    .product-information__media .product-media-container--image:not(:has(.frame-preview)) .product-media__image {
+      aspect-ratio: 3/4;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
 {% endstylesheet %}
 
 {% schema %}

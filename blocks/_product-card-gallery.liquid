@@ -103,8 +103,9 @@
 {% stylesheet %}
   .frame-preview--card {
     position: relative;
-    width: 100%;
-    height: 100%;
+    aspect-ratio: 0.707;
+    max-width: 100%;
+    margin: 0 auto;
     overflow: hidden;
     background-color: #ffffff;
   }
@@ -150,13 +151,13 @@
 
   @media screen and (max-width: 749px) {
     .product-grid__card .frame-preview--card {
-      height: 260px;
+      max-height: 260px;
     }
   }
 
   @media screen and (min-width: 750px) {
     .product-grid__card .frame-preview--card {
-      height: 340px;
+      max-height: 340px;
     }
 
     .frame-preview--card .frame-preview__inner .product-media {
