@@ -404,7 +404,7 @@
               assign media_sizes = sizes
             endif
         -%}
-        {% if media.media_type == 'image' and frame_url != blank %}
+        {% if forloop.first and media.media_type == 'image' and frame_url != blank %}
           <div class="frame-preview{% if frame_option != blank %} frame-preview--{{ frame_option }}{% endif %}">
             <div class="frame-preview__inner">
               {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
