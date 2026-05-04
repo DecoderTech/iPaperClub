@@ -18,7 +18,7 @@
           "settings": {
             "media_presentation": "grid",
             "media_columns": "two",
-            "image_gap": 20,
+            "image_gap": 1,
             "large_first_image": true,
             "icons_style": "none",
             "slideshow_controls_style": "counter",
@@ -33,7 +33,7 @@
             "zoom": true,
             "video_loop": false,
             "hide_variants": false,
-            "padding-block-start": 0,
+            "padding-block-start": 60,
             "padding-block-end": 0,
             "padding-inline-start": 0,
             "padding-inline-end": 0
@@ -750,32 +750,6 @@
     "product_recommendations_iA6pyd": {
       "type": "product-recommendations",
       "blocks": {
-        "heading_voce_tambem": {
-          "type": "text",
-          "name": "t:names.heading",
-          "settings": {
-            "text": "<h2>Você também pode amar</h2>",
-            "width": "fill",
-            "max_width": "normal",
-            "alignment": "center",
-            "type_preset": "h3",
-            "font": "var(--font-heading--family)",
-            "font_size": "var(--font-size--h3)",
-            "line_height": "var(--font-line-height--heading)",
-            "letter_spacing": "var(--font-letter-spacing--heading)",
-            "case": "none",
-            "wrap": "pretty",
-            "color": "var(--color-foreground)",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 16,
-            "padding-block-end": 16,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        },
         "static-product-card": {
           "type": "_product-card",
           "name": "t:names.product_card",
@@ -825,7 +799,7 @@
         "max_products": 5,
         "columns": 3,
         "mobile_columns": "1",
-        "columns_gap": 0,
+        "columns_gap": 1,
         "rows_gap": 2,
         "icons_style": "arrow",
         "icons_shape": "none",
