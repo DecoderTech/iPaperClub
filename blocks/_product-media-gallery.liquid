@@ -318,7 +318,9 @@
 
   @media screen and (min-width: 750px) {
     .frame-preview {
-      height: min(calc(100vh - 160px), 640px);
+      aspect-ratio: 3/4;
+      max-height: min(calc(100vh - 160px), 640px);
+      margin: 0 auto;
     }
 
     .frame-preview__inner .product-media {
