@@ -22,44 +22,9 @@
 
 {% liquid
   assign is_frame_product = false
-  
-  # Check product type
-  if closest.product.type contains 'Quadro' or closest.product.type contains 'quadro'
+  if closest.product.type == 'Quadro'
     assign is_frame_product = true
   endif
-
-  # Check tags
-  unless is_frame_product
-    for tag in closest.product.tags
-      assign tag_down = tag | downcase
-      if tag_down contains 'quadro'
-        assign is_frame_product = true
-        break
-      endif
-    endfor
-  endunless
-
-  # Check options (like in PDP)
-  unless is_frame_product
-    for option in closest.product.options_with_values
-      assign option_name = option.name | downcase
-      if option_name contains 'moldura'
-        assign is_frame_product = true
-        break
-      endif
-      
-      for value in option.values
-        assign value_down = value | downcase
-        if value_down contains 'preta' or value_down contains 'branca' or value_down contains 'madeira'
-          assign is_frame_product = true
-          break
-        endif
-      endfor
-      if is_frame_product
-        break
-      endif
-    endfor
-  endunless
 %}
 
 {% if is_frame_product %}
@@ -103,9 +68,8 @@
 {% stylesheet %}
   .frame-preview--card {
     position: relative;
-    aspect-ratio: 0.707;
-    max-width: 100%;
-    margin: 0 auto;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     background-color: #ffffff;
   }
@@ -151,13 +115,13 @@
 
   @media screen and (max-width: 749px) {
     .product-grid__card .frame-preview--card {
-      max-height: 260px;
+      height: 260px;
     }
   }
 
   @media screen and (min-width: 750px) {
     .product-grid__card .frame-preview--card {
-      max-height: 340px;
+      height: 340px;
     }
 
     .frame-preview--card .frame-preview__inner .product-media {
