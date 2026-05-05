@@ -124,6 +124,12 @@
     margin: 0 auto;
   }
 
+  /* Home: arte com cover pra eliminar margem branca top/bottom (crop lateral fica dentro da sangria) */
+  .ui-test-product-list .frame-preview--card .frame-preview__inner .product-media,
+  .ui-test-product-list .frame-preview--card .frame-preview__inner .product-media__image {
+    object-fit: cover;
+  }
+
   @media screen and (max-width: 749px) {
     .ui-test-product-list .frame-preview--card {
       width: calc(260px * 4488 / 5315);
