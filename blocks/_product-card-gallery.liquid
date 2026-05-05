@@ -41,7 +41,7 @@
       </div>
       <img
         class="frame-preview__frame-image"
-        src="https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538"
+        src="{{ 'moldura_white_v2.png' | asset_url }}"
         alt=""
         loading="lazy"
       >
@@ -69,39 +69,23 @@
   .frame-preview--card {
     position: relative;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 4488 / 5315;
     overflow: hidden;
-    background-color: #ffffff;
-  }
-
-  /* Aspect ratio fix for frames */
-  .frame-preview--card.frame-preview--ratio {
-    aspect-ratio: 0.707; /* Approx 1:1.414 (A series) or 5:7 */
-    height: auto !important;
-    min-height: auto !important;
   }
 
   .frame-preview--card .frame-preview__inner {
-    box-sizing: border-box;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    padding: 5.45% 11.25%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
-  .frame-preview--card .frame-preview__inner .product-media {
-    width: 100%;
-    height: auto;
-    padding: 0;
-    aspect-ratio: auto;
-  }
-
+  .frame-preview--card .frame-preview__inner .product-media,
   .frame-preview--card .frame-preview__inner .product-media__image {
     width: 100%;
-    height: auto;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: auto;
   }
 
   .frame-preview--card .frame-preview__frame-image {
@@ -111,31 +95,6 @@
     height: 100%;
     pointer-events: none;
     object-fit: contain;
-  }
-
-  @media screen and (max-width: 749px) {
-    .product-grid__card .frame-preview--card {
-      height: 260px;
-    }
-  }
-
-  @media screen and (min-width: 750px) {
-    .product-grid__card .frame-preview--card {
-      height: 340px;
-    }
-
-    .frame-preview--card .frame-preview__inner .product-media {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    .frame-preview--card .frame-preview__inner .product-media__image {
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
   }
 {% endstylesheet %}
 
