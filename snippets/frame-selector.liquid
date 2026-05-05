@@ -5,7 +5,9 @@
 
 {% liquid
   assign show_selector = false
-  if collection.handle == 'quadros'
+  if force_show
+    assign show_selector = true
+  elsif collection.handle == 'quadros'
     assign show_selector = true
   elsif collection.products.first.type contains 'Quadro'
     assign show_selector = true
@@ -111,15 +113,15 @@
     /* CSS Variable Override for Frame Image */
     /* Scoped to collection template to avoid affecting Home */
     body.template-collection.frame-selected-black .frame-preview__frame-image {
-      content: url("https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_black.png?v=1768429549");
+      content: url("{{ 'moldura_black_v2.png' | asset_url }}");
     }
 
     body.template-collection.frame-selected-oak .frame-preview__frame-image {
-      content: url("https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_oak.png?v=1768429562");
+      content: url("{{ 'moldura_oak_v2.png' | asset_url }}");
     }
 
     body.template-collection.frame-selected-white .frame-preview__frame-image {
-      content: url("https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538");
+      content: url("{{ 'moldura_white_v2.png' | asset_url }}");
     }
 
   </style>
