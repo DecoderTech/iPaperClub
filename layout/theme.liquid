@@ -51,7 +51,11 @@
 
     {{ content_for_header }}
 
-  </head>
+  <style>
+  /* Remove borda cinza dos cards de produto na collection */
+  .product-grid__item { border: 0 !important; }
+</style>
+</head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
     
