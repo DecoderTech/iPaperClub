@@ -305,13 +305,12 @@
   }
 
   @media screen and (max-width: 749px) {
-    /* CHAVE: o slide parent muda aspect-ratio pra MATCH o frame quando contem frame-preview */
-    /* Sem isso, slide tem aspect 0.762 (arte) e frame tem 0.844 (PNG) -> conflito */
+    /* SCOPED ao PDP via slideshow-slide. NAO afeta cards (.frame-preview--card em coleção/home) */
     slideshow-slide.product-media-container:has(.frame-preview) {
       aspect-ratio: 4488 / 5315 !important;
       display: block !important;
     }
-    .frame-preview {
+    slideshow-slide .frame-preview {
       width: 100% !important;
       aspect-ratio: 4488 / 5315 !important;
       height: auto !important;
@@ -320,7 +319,7 @@
       overflow: hidden !important;
       margin: 0 !important;
     }
-    .frame-preview .frame-preview__inner {
+    slideshow-slide .frame-preview .frame-preview__inner {
       position: absolute !important;
       inset: 0 !important;
       width: 100% !important;
@@ -328,7 +327,7 @@
       display: block !important;
       padding: 0 !important;
     }
-    .frame-preview .product-media {
+    slideshow-slide .frame-preview .product-media {
       position: relative !important;
       display: block !important;
       width: 100% !important;
@@ -336,8 +335,7 @@
       flex: none !important;
       aspect-ratio: auto !important;
     }
-    .frame-preview .product-media__image,
-    .frame-preview img.product-media__image {
+    slideshow-slide .frame-preview .product-media__image {
       width: 100% !important;
       height: 100% !important;
       max-width: none !important;
@@ -347,7 +345,7 @@
       object-position: center !important;
       display: block !important;
     }
-    .frame-preview .frame-preview__frame-image {
+    slideshow-slide .frame-preview .frame-preview__frame-image {
       position: absolute !important;
       inset: 0 !important;
       width: 100% !important;
