@@ -150,8 +150,21 @@
     }
   }
 
-  .collection-wrapper .product-grid__card {
+  .collection-wrapper .product-grid__card,
+  .collection-wrapper .product-grid__card .group-block {
     background-color: transparent;
+  }
+
+  .collection-wrapper .product-grid__card {
+    border-color: rgb(var(--color-border-rgb) / 1);
+  }
+
+  .collection-wrapper .product-grid__card:has(.frame-preview--card) {
+    padding-block-start: 8px;
+  }
+
+  .collection-wrapper .product-grid__card .group-block-content {
+    gap: 6px;
   }
 {% endstylesheet %}
 
