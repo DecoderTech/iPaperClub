@@ -137,8 +137,7 @@
           alt: section.settings.image_2.alt,
           class: 'hero__image',
           sizes: sizes,
-          fetchpriority: fetch_priority,
-          loading: 'lazy'
+          fetchpriority: fetch_priority
       }}
     </picture>
 {%- endif -%}
@@ -187,8 +186,7 @@
         height: section.settings.image_1.height,
         alt: '',
         class: 'hero__image',
-        sizes: sizes,
-        loading: 'lazy'
+        sizes: sizes
     }}
   {% endif %}
   {% if has_image_2 %}
@@ -201,8 +199,7 @@
         height: section.settings.image_2.height,
         alt: '',
         class: 'hero__image',
-        sizes: sizes,
-        loading: 'lazy'
+        sizes: sizes
     }}
   {% endif %}
   {% if has_media == false and is_transparent %}

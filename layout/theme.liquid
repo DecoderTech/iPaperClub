@@ -4,21 +4,6 @@
   lang="{{ request.locale.iso_code }}"
 >
   <head>
-
-    <!-- Performance: preconnect + dns-prefetch -->
-    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.shopify.com">
-
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GT-K5LBTZ86"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'GT-K5LBTZ86');
-</script>
-    
     {%- render 'stylesheets' -%}
 
     {%- if settings.favicon != blank -%}
@@ -50,18 +35,10 @@
     {% endif %}
 
     {{ content_for_header }}
-
-  <style>
-  /* Remove borda cinza dos cards de produto na collection */
-  .product-grid__item { border: 0 !important; }
-</style>
-</head>
+  </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
-    
-
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
-    
     <div id="header-group">
       {% sections 'header-group' %}
     </div>
@@ -84,28 +61,43 @@
       {{ content_for_layout }}
     </main>
 
+
+
+    
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        function cleanVariantParam() {
-          const url = new URL(window.location.href);
-          if (url.searchParams.has("variant")) {
-            url.searchParams.delete("variant");
-            window.history.replaceState({}, document.title, url.pathname);
-          }
-        }
-        cleanVariantParam();
-        const observer = new MutationObserver(() => {
-          cleanVariantParam();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-      });
-    </script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Função que limpa o parâmetro variant da URL
+    function cleanVariantParam() {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("variant")) {
+        url.searchParams.delete("variant");
+        window.history.replaceState({}, document.title, url.pathname);
+      }
+    }
+
+    // Executa a limpeza inicial
+    cleanVariantParam();
+
+    // Observa mudanças na URL (quando a variante é selecionada)
+    const observer = new MutationObserver(() => {
+      cleanVariantParam();
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+</script>
+
+
+
+
 
     {% sections 'footer-group' %}
+
     {% render 'search-modal' %}
 
     {% if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add-modal' %}
     {% endif %}
   </body>
+
 </html>

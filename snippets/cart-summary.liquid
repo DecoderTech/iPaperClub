@@ -47,7 +47,11 @@
   {% endif %}
 
   {%- liquid
-    assign total_price = cart.total_price | money
+    if settings.currency_code_enabled_cart_total
+      assign total_price = cart.total_price | money_with_currency
+    else
+      assign total_price = cart.total_price | money
+    endif
   -%}
 
   <div class="cart__total-container">

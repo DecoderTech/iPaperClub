@@ -51,18 +51,9 @@
     slides: slides,
     slideshow_arrows: slideshow_arrows,
     auto_hide_controls: false,
-    infinite: true,
+    infinite: false,
     initial_slide: 0,
     slide_count: slide_count,
     slideshow_gutters: slideshow_gutters
   %}
 </div>
-
-{% stylesheet %}
-  /* Mobile: slide ocupa largura total da tela (evita gap cinza lateral) */
-  @media screen and (max-width: 749px) {
-    .resource-list__carousel {
-      --slide-width-max: 92vw;
-    }
-  }
-{% endstylesheet %}

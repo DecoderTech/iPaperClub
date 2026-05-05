@@ -5,9 +5,7 @@
 
 {% liquid
   assign show_selector = false
-  if force_show
-    assign show_selector = true
-  elsif collection.handle == 'quadros'
+  if collection.handle == 'quadros'
     assign show_selector = true
   elsif collection.products.first.type contains 'Quadro'
     assign show_selector = true
@@ -23,6 +21,7 @@
 
 {% if show_selector %}
   <div class="frame-selector-wrapper sticky-content">
+    <span class="frame-selector-label">Escolha a moldura:</span>
     <div class="frame-selector-options">
       <button class="frame-option active" data-frame="white" title="Branca" aria-label="Moldura Branca"></button>
       <button class="frame-option" data-frame="black" title="Preta" aria-label="Moldura Preta"></button>
@@ -112,15 +111,15 @@
     /* CSS Variable Override for Frame Image */
     /* Scoped to collection template to avoid affecting Home */
     body.template-collection.frame-selected-black .frame-preview__frame-image {
-      content: url("{{ 'moldura_black_v2.png' | asset_url }}");
+      content: url("{{ 'moldura_black_fixed.png' | asset_url }}");
     }
 
     body.template-collection.frame-selected-oak .frame-preview__frame-image {
-      content: url("{{ 'moldura_oak_v2.png' | asset_url }}");
+      content: url("{{ 'moldura_oak_fixed.png' | asset_url }}");
     }
 
     body.template-collection.frame-selected-white .frame-preview__frame-image {
-      content: url("{{ 'moldura_white_v2.png' | asset_url }}");
+      content: url("{{ 'moldura_white_fixed.png' | asset_url }}");
     }
 
   </style>

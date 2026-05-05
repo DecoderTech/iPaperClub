@@ -18,7 +18,7 @@
           "settings": {
             "media_presentation": "grid",
             "media_columns": "two",
-            "image_gap": 1,
+            "image_gap": 20,
             "large_first_image": true,
             "icons_style": "none",
             "slideshow_controls_style": "counter",
@@ -109,7 +109,7 @@
               "settings": {
                 "show_sale_price_first": true,
                 "show_installments": true,
-                "show_tax_info": false,
+                "show_tax_info": true,
                 "type_preset": "h4",
                 "width": "100%",
                 "alignment": "left",
@@ -795,8 +795,8 @@
         "product": "{{ closest.product }}",
         "recommendation_type": "related",
         "layout_type": "grid",
-        "carousel_on_mobile": true,
-        "max_products": 5,
+        "carousel_on_mobile": false,
+        "max_products": 3,
         "columns": 3,
         "mobile_columns": "1",
         "columns_gap": 1,

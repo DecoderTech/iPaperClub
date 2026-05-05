@@ -49,8 +49,6 @@
     {%- content_for 'block', type: '_product-list-content', id: 'static-header' -%}
   </div>
 
-  {% render 'frame-selector', force_show: true %}
-
   {% capture list_items %}
     {% for i in (1..max_items) %}
       {% if section_products.size > 0 %}

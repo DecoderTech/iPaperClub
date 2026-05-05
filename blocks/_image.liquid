@@ -10,7 +10,6 @@
 {% assign block_settings = block.settings %}
 {% assign image = closest.collection.featured_image | default: closest.product.featured_image %}
 {% assign alt = closest.collection.title | default: closest.product.title %}
-{% assign loading = loading | default: 'lazy' %}
 
 {% liquid
   assign width = '100%'
