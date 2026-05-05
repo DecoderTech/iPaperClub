@@ -117,6 +117,18 @@
   @media screen and (min-width: 750px) {
     .product-grid__card .frame-preview--card { height: 340px; }
   }
+
+  /* Home product-list: card centralizado com proporcao do PNG (resolve margem branca lateral) */
+  .ui-test-product-list .frame-preview--card {
+    width: calc(340px * 4488 / 5315);
+    margin: 0 auto;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ui-test-product-list .frame-preview--card {
+      width: calc(260px * 4488 / 5315);
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
