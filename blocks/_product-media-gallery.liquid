@@ -41,11 +41,11 @@
 
   assign frame_url = blank
   if frame_option == 'white'
-    assign frame_url = 'moldura_white_v2.png' | asset_url
+    assign frame_url = 'https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538'
   elsif frame_option == 'black'
-    assign frame_url = 'moldura_black_v2.png' | asset_url
+    assign frame_url = 'https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_black.png?v=1768429549'
   elsif frame_option == 'oak'
-    assign frame_url = 'moldura_oak_v2.png' | asset_url
+    assign frame_url = 'https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_oak.png?v=1768429562'
   endif
 
   if block_settings.hide_variants
@@ -275,24 +275,17 @@
   .frame-preview {
     position: relative;
     width: 100%;
-    aspect-ratio: 4488 / 5315;
     overflow: hidden;
-    margin: 0 auto;
   }
 
   .frame-preview__inner {
-    position: absolute;
-    inset: 0;
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
-  }
-
-  .frame-preview__inner .product-media,
-  .frame-preview__inner .product-media__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    aspect-ratio: auto;
+    padding: 5.45% 11.25%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .frame-preview__frame-image {
@@ -304,16 +297,41 @@
     object-fit: contain;
   }
 
+  .frame-preview__inner .product-media {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    aspect-ratio: auto;
+  }
+
+  .frame-preview__inner .product-media__image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
   @media screen and (max-width: 749px) {
     .frame-preview {
-      width: 90%;
+      height: 420px;
     }
   }
 
   @media screen and (min-width: 750px) {
     .frame-preview {
-      max-height: min(calc(100vh - 160px), 720px);
+      height: 640px;
+    }
+
+    .frame-preview__inner .product-media {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .frame-preview__inner .product-media__image {
       width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
     }
   }
 
@@ -383,8 +401,13 @@
             else
               assign media_sizes = sizes
             endif
+            assign is_mockup_image = false
+            assign media_src_check = media.src | downcase
+            if media_src_check contains 'mockup'
+              assign is_mockup_image = true
+            endif
         -%}
-        {% if forloop.first and media.media_type == 'image' and frame_url != blank %}
+        {% if media.media_type == 'image' and frame_url != blank and is_mockup_image == false %}
           <div class="frame-preview{% if frame_option != blank %} frame-preview--{{ frame_option }}{% endif %}">
             <div class="frame-preview__inner">
               {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
@@ -509,8 +532,13 @@
             else
               assign media_sizes = sizes
             endif
+            assign is_mockup_image = false
+            assign media_src_check = media.src | downcase
+            if media_src_check contains 'mockup'
+              assign is_mockup_image = true
+            endif
           -%}
-          {% if forloop.first and media.media_type == 'image' and frame_url != blank %}
+          {% if forloop.first and media.media_type == 'image' and frame_url != blank and is_mockup_image == false %}
             <div class="frame-preview{% if frame_option != blank %} frame-preview--{{ frame_option }}{% endif %}">
               <div class="frame-preview__inner">
                 {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
@@ -805,21 +833,6 @@
     /* Make the height match the height of the model-viewer */
     height: 100vh;
   }
-
-  /* Mobile: aplicar 3:4 nos slides de mockup (sem frame). Frame proprio usa aspect-ratio do PNG outer. */
-  @media screen and (max-width: 749px) {
-    .product-information__media .product-media-container--image:not(:has(.frame-preview)) {
-      aspect-ratio: 3/4;
-    }
-    .product-information__media .product-media-container--image:not(:has(.frame-preview)) .product-media,
-    .product-information__media .product-media-container--image:not(:has(.frame-preview)) .product-media__image {
-      aspect-ratio: 3/4;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
 {% endstylesheet %}
 
 {% schema %}
