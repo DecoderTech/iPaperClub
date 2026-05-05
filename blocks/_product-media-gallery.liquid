@@ -308,6 +308,14 @@
     .frame-preview {
       width: 90%;
     }
+    /* Sobrescreve regra global do base.css (.product-media-container img { object-fit: contain }) */
+    /* que estava fazendo a arte aparecer em tamanho natural por tras do frame em mobile */
+    .frame-preview .product-media-container img,
+    .frame-preview .product-media__image,
+    .frame-preview__inner .product-media__image {
+      object-fit: cover !important;
+      aspect-ratio: auto !important;
+    }
   }
 
   @media screen and (min-width: 750px) {
