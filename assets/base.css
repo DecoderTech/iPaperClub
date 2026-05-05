@@ -4298,3 +4298,30 @@ text-component {
   }
   .grid__item { width: 100% !important; max-width: none !important; }
 }
+
+/* iPaperClub: resource-list grid spacing */
+.section-resource-list .resource-list--grid {
+  gap: 12px !important;
+  padding: 12px;
+}
+
+/* iPaperClub: product card visual standardization */
+.product-grid__card.product-grid__card,
+.product-grid__card.product-grid__card .group-block {
+  background-color: transparent;
+}
+
+.product-grid__card.product-grid__card {
+  border-color: rgb(var(--color-border-rgb) / 1);
+}
+
+.resource-list__item .product-grid__card.product-grid__card {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 9px;
+}
+
+
+.product-grid__card.product-grid__card .group-block-content {
+  gap: 6px;
+}
