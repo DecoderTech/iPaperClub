@@ -306,14 +306,50 @@
 
   @media screen and (max-width: 749px) {
     .frame-preview {
-      width: 90%;
+      width: 90% !important;
+      aspect-ratio: 4488 / 5315 !important;
+      height: auto !important;
+      max-height: none !important;
+      position: relative !important;
+      overflow: hidden !important;
+      margin: 0 auto !important;
     }
-    /* Sobrescreve regra global do base.css (.product-media-container img { object-fit: contain }) */
-    /* que estava fazendo a arte aparecer em tamanho natural por tras do frame em mobile */
-    .frame-preview .product-media-container img,
+    .frame-preview .frame-preview__inner {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      padding: 0 !important;
+    }
+    .frame-preview .product-media {
+      position: relative !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      flex: none !important;
+      aspect-ratio: auto !important;
+    }
     .frame-preview .product-media__image,
-    .frame-preview__inner .product-media__image {
+    .frame-preview img.product-media__image,
+    .product-media-container .frame-preview .product-media__image {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
       object-fit: cover !important;
+      object-position: center !important;
+      display: block !important;
+      position: relative !important;
+    }
+    .frame-preview .frame-preview__frame-image {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+      pointer-events: none !important;
       aspect-ratio: auto !important;
     }
   }
