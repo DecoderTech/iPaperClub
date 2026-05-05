@@ -310,6 +310,21 @@
     object-fit: contain;
   }
 
+  .frame-preview--mockup .frame-preview__inner {
+    padding: 0;
+  }
+
+  .frame-preview--mockup .frame-preview__inner .product-media {
+    width: 100%;
+    height: 100%;
+  }
+
+  .frame-preview--mockup .frame-preview__inner .product-media__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   @media screen and (max-width: 749px) {
     .frame-preview {
       height: 420px;
@@ -407,8 +422,8 @@
               assign is_mockup_image = true
             endif
         -%}
-        {% if media.media_type == 'image' and frame_url != blank and is_mockup_image == false %}
-          <div class="frame-preview{% if frame_option != blank %} frame-preview--{{ frame_option }}{% endif %}">
+        {% if media.media_type == 'image' and frame_url != blank %}
+          <div class="frame-preview{% if frame_option != blank %} frame-preview--{{ frame_option }}{% endif %}{% if is_mockup_image %} frame-preview--mockup{% endif %}">
             <div class="frame-preview__inner">
               {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
                 <div class="product-media-constraint-wrapper">
@@ -418,12 +433,14 @@
                 {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: forloop.first -%}
               {% endif %}
             </div>
-            <img
-              class="frame-preview__frame-image"
-              src="{{ frame_url }}"
-              alt=""
-              loading="lazy"
-            >
+            {% unless is_mockup_image %}
+              <img
+                class="frame-preview__frame-image"
+                src="{{ frame_url }}"
+                alt=""
+                loading="lazy"
+              >
+            {% endunless %}
           </div>
         {% else %}
           {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
@@ -538,8 +555,8 @@
               assign is_mockup_image = true
             endif
           -%}
-          {% if forloop.first and media.media_type == 'image' and frame_url != blank and is_mockup_image == false %}
-            <div class="frame-preview{% if frame_option != blank %} frame-preview--{{ frame_option }}{% endif %}">
+          {% if forloop.first and media.media_type == 'image' and frame_url != blank %}
+            <div class="frame-preview{% if frame_option != blank %} frame-preview--{{ frame_option }}{% endif %}{% if is_mockup_image %} frame-preview--mockup{% endif %}">
               <div class="frame-preview__inner">
                 {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
                   <div class="product-media-constraint-wrapper">
@@ -549,12 +566,14 @@
                   {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: forloop.first -%}
                 {% endif %}
               </div>
-              <img
-                class="frame-preview__frame-image"
-                src="{{ frame_url }}"
-                alt=""
-                loading="lazy"
-              >
+              {% unless is_mockup_image %}
+                <img
+                  class="frame-preview__frame-image"
+                  src="{{ frame_url }}"
+                  alt=""
+                  loading="lazy"
+                >
+              {% endunless %}
             </div>
           {% else %}
             {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
