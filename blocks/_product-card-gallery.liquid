@@ -36,12 +36,9 @@
   %}
   {% if target_media != blank %}
     <div class="frame-preview frame-preview--oak frame-preview--card">
-      <img
-        class="frame-preview__art"
-        src="{{ target_media.preview_image | image_url: width: 1200 }}"
-        alt="{{ closest.product.title | escape }}"
-        loading="lazy"
-      >
+      <div class="frame-preview__inner">
+        {% render 'product-media', media: target_media, preview_image_only: true, loading: 'lazy' %}
+      </div>
       <img
         class="frame-preview__frame-image"
         src="{{ 'moldura_oak_v2.png' | asset_url }}"
@@ -72,17 +69,39 @@
   .frame-preview--card {
     position: relative;
     width: 100%;
-    aspect-ratio: 1890 / 2481;
+    height: 100%;
     overflow: hidden;
+    background-color: #ffffff;
   }
 
-  .frame-preview--card .frame-preview__art {
-    position: absolute;
-    inset: 0;
+  /* Aspect ratio fix for frames */
+  .frame-preview--card.frame-preview--ratio {
+    aspect-ratio: 0.707; /* Approx 1:1.414 (A series) or 5:7 */
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .frame-preview--card .frame-preview__inner {
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
+    padding: 5.45% 11.25%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .frame-preview--card .frame-preview__inner .product-media {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    aspect-ratio: auto;
+  }
+
+  .frame-preview--card .frame-preview__inner .product-media__image {
+    width: 100%;
+    height: auto;
     object-fit: contain;
-    display: block;
   }
 
   .frame-preview--card .frame-preview__frame-image {
@@ -92,7 +111,31 @@
     height: 100%;
     pointer-events: none;
     object-fit: contain;
-    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    .product-grid__card .frame-preview--card {
+      height: 260px;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .product-grid__card .frame-preview--card {
+      height: 340px;
+    }
+
+    .frame-preview--card .frame-preview__inner .product-media {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .frame-preview--card .frame-preview__inner .product-media__image {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
   }
 {% endstylesheet %}
 
