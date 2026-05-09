@@ -84,13 +84,14 @@
     background-size: 33.33% 33.33%;
   }
   .pz-ch {
-    position: absolute; width: 18px; height: 18px;
+    position: absolute; width: 22px; height: 22px; z-index: 4;
     border-color: #fff; border-style: solid;
+    touch-action: none;
   }
-  .pz-ch--nw { top: -1px; left: -1px; border-width: 3px 0 0 3px; }
-  .pz-ch--ne { top: -1px; right: -1px; border-width: 3px 3px 0 0; }
-  .pz-ch--sw { bottom: -1px; left: -1px; border-width: 0 0 3px 3px; }
-  .pz-ch--se { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+  .pz-ch--nw { border-width: 3px 0 0 3px; cursor: nw-resize; }
+  .pz-ch--ne { border-width: 3px 3px 0 0; cursor: ne-resize; }
+  .pz-ch--sw { border-width: 0 0 3px 3px; cursor: sw-resize; }
+  .pz-ch--se { border-width: 0 3px 3px 0; cursor: se-resize; }
   .pz-crop-ctrl {
     flex: 1; min-width: 0; height: 100%;
     display: flex; flex-direction: column; justify-content: center;
@@ -244,12 +245,11 @@
     <div class="pz-step pz-s2" id="pz-s2" hidden>
       <div class="pz-crop-area" id="pz-crop-area">
         <img id="pz-crop-img" src="" alt="" draggable="false">
-        <div id="pz-crop-box">
-          <div class="pz-ch pz-ch--nw"></div>
-          <div class="pz-ch pz-ch--ne"></div>
-          <div class="pz-ch pz-ch--sw"></div>
-          <div class="pz-ch pz-ch--se"></div>
-        </div>
+        <div id="pz-crop-box"></div>
+        <div class="pz-ch pz-ch--nw" data-corner="nw"></div>
+        <div class="pz-ch pz-ch--ne" data-corner="ne"></div>
+        <div class="pz-ch pz-ch--sw" data-corner="sw"></div>
+        <div class="pz-ch pz-ch--se" data-corner="se"></div>
       </div>
       <div class="pz-crop-ctrl">
         <div>
@@ -351,8 +351,10 @@
   let bL = 0, bT = 0, bW = 0, bH = 0;
   /* image position/size */
   let iX = 0, iY = 0, iW = 0, iH = 0, iSc = 1;
-  /* drag */
+  /* drag imagem */
   let dragging = false, dragSX = 0, dragSY = 0, dragIX = 0, dragIY = 0;
+  /* drag canto */
+  let cornerDrag = null, cdSX = 0, cdSY = 0, cdBL = 0, cdBT = 0, cdBW = 0, cdBH = 0;
 
   /* ── Elements ── */
   const s1         = document.getElementById('pz-s1');
@@ -506,6 +508,14 @@
     iY = clamp(iY, bT + bH - iH, bT);
   }
 
+  const cornerEls = {
+    nw: cropArea.querySelector('[data-corner="nw"]'),
+    ne: cropArea.querySelector('[data-corner="ne"]'),
+    sw: cropArea.querySelector('[data-corner="sw"]'),
+    se: cropArea.querySelector('[data-corner="se"]'),
+  };
+  const CH = 11; /* metade do handle (22px / 2) */
+
   function applyDom() {
     cropImg.style.width  = iW + 'px';
     cropImg.style.height = iH + 'px';
@@ -514,6 +524,11 @@
     cropBox.style.top    = bT + 'px';
     cropBox.style.width  = bW + 'px';
     cropBox.style.height = bH + 'px';
+    /* posiciona os cantos centrados nos vértices do crop box */
+    cornerEls.nw.style.left = (bL - CH) + 'px'; cornerEls.nw.style.top = (bT - CH) + 'px';
+    cornerEls.ne.style.left = (bL + bW - CH) + 'px'; cornerEls.ne.style.top = (bT - CH) + 'px';
+    cornerEls.sw.style.left = (bL - CH) + 'px'; cornerEls.sw.style.top = (bT + bH - CH) + 'px';
+    cornerEls.se.style.left = (bL + bW - CH) + 'px'; cornerEls.se.style.top = (bT + bH - CH) + 'px';
   }
 
   function getCropParams() {
@@ -527,21 +542,93 @@
     };
   }
 
-  /* drag on crop area */
+  /* ── Redimensionar crop box pelos cantos ── */
+  function applyCornerDrag(dx, dy) {
+    const aW = cropArea.offsetWidth, aH = cropArea.offsetHeight;
+    const fR = selW / selH;
+    const MIN = 80;
+    let nBL = cdBL, nBT = cdBT, nBW = cdBW, nBH = cdBH;
+
+    if (cornerDrag === 'se') {
+      nBW = cdBW + dx;
+    } else if (cornerDrag === 'sw') {
+      nBW = cdBW - dx;
+      nBL = cdBL + cdBW - nBW;
+    } else if (cornerDrag === 'ne') {
+      nBW = cdBW + dx;
+      nBH = nBW / fR;
+      nBT = cdBT + cdBH - nBH;
+    } else if (cornerDrag === 'nw') {
+      nBW = cdBW - dx;
+      nBL = cdBL + cdBW - nBW;
+      nBH = nBW / fR;
+      nBT = cdBT + cdBH - nBH;
+    }
+    nBW = Math.max(MIN, nBW);
+    nBH = nBW / fR;
+
+    /* recalcula nBT para NE/NW depois do clamp */
+    if (cornerDrag === 'ne' || cornerDrag === 'nw') {
+      nBT = cdBT + cdBH - nBH;
+    }
+
+    /* mantém dentro da área */
+    if (nBL < 0) { nBW += nBL; nBL = 0; nBH = nBW / fR; }
+    if (nBT < 0) { nBH += nBT; nBT = 0; nBW = nBH * fR; }
+    if (nBL + nBW > aW) nBW = aW - nBL;
+    if (nBT + nBH > aH) nBH = aH - nBT;
+
+    bL = nBL; bT = nBT; bW = nBW; bH = nBH;
+
+    /* garante que a imagem cobre o novo crop box */
+    const minSc = Math.max(bW / cropImg.naturalWidth, bH / cropImg.naturalHeight);
+    if (iSc < minSc) {
+      iSc = minSc;
+      iW = cropImg.naturalWidth * iSc;
+      iH = cropImg.naturalHeight * iSc;
+    }
+    constrainImg(); applyDom();
+  }
+
+  Object.values(cornerEls).forEach(el => {
+    el.addEventListener('mousedown', e => {
+      e.preventDefault(); e.stopPropagation();
+      cornerDrag = el.dataset.corner;
+      cdSX = e.clientX; cdSY = e.clientY;
+      cdBL = bL; cdBT = bT; cdBW = bW; cdBH = bH;
+    });
+    el.addEventListener('touchstart', e => {
+      e.preventDefault(); e.stopPropagation();
+      cornerDrag = el.dataset.corner;
+      const t = e.touches[0];
+      cdSX = t.clientX; cdSY = t.clientY;
+      cdBL = bL; cdBT = bT; cdBW = bW; cdBH = bH;
+    }, { passive: false });
+  });
+
+  /* drag on crop area (imagem) */
   cropArea.addEventListener('mousedown', e => {
+    if (e.target.dataset.corner) return;
     e.preventDefault();
     dragging = true; dragSX = e.clientX; dragSY = e.clientY;
     dragIX = iX; dragIY = iY;
     cropArea.classList.add('dragging');
   });
   window.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    iX = dragIX + (e.clientX - dragSX);
-    iY = dragIY + (e.clientY - dragSY);
-    constrainImg(); applyDom();
+    if (cornerDrag) {
+      applyCornerDrag(e.clientX - cdSX, e.clientY - cdSY);
+    } else if (dragging) {
+      iX = dragIX + (e.clientX - dragSX);
+      iY = dragIY + (e.clientY - dragSY);
+      constrainImg(); applyDom();
+    }
   });
-  window.addEventListener('mouseup', () => { dragging = false; cropArea.classList.remove('dragging'); });
+  window.addEventListener('mouseup', () => {
+    dragging = false; cornerDrag = null;
+    cropArea.classList.remove('dragging');
+  });
   cropArea.addEventListener('touchstart', e => {
+    if (e.target.dataset.corner) return;
     e.preventDefault();
     const t = e.touches[0];
     dragging = true; dragSX = t.clientX; dragSY = t.clientY;
@@ -549,13 +636,16 @@
   }, { passive: false });
   cropArea.addEventListener('touchmove', e => {
     e.preventDefault();
-    if (!dragging) return;
     const t = e.touches[0];
-    iX = dragIX + (t.clientX - dragSX);
-    iY = dragIY + (t.clientY - dragSY);
-    constrainImg(); applyDom();
+    if (cornerDrag) {
+      applyCornerDrag(t.clientX - cdSX, t.clientY - cdSY);
+    } else if (dragging) {
+      iX = dragIX + (t.clientX - dragSX);
+      iY = dragIY + (t.clientY - dragSY);
+      constrainImg(); applyDom();
+    }
   }, { passive: false });
-  cropArea.addEventListener('touchend', () => { dragging = false; });
+  cropArea.addEventListener('touchend', () => { dragging = false; cornerDrag = null; });
 
   /* ── Size selection ── */
   document.getElementById('pz-size-grid')?.querySelectorAll('.pz-size-card').forEach(btn => {
