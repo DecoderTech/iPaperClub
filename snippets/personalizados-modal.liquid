@@ -12,17 +12,14 @@
     display: flex; flex-direction: column; overflow: hidden;
   }
 
-  /* Header */
+  /* ── Header ── */
   .pz-hd {
     flex-shrink: 0; height: 54px;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 20px;
     border-bottom: 1px solid rgb(var(--color-border-rgb,0 0 0)/.1);
   }
-  .pz-hd__title {
-    font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-    margin: 0;
-  }
+  .pz-hd__title { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin: 0; }
   .pz-hd__close {
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -31,16 +28,13 @@
   }
   .pz-hd__close:hover { background: rgb(var(--color-foreground-rgb,0 0 0)/.08); }
 
-  /* Steps */
+  /* ── Steps ── */
   .pz-step { flex: 1; min-height: 0; overflow: hidden; display: flex; }
   .pz-step[hidden] { display: none !important; }
 
-  /* Step 1 */
+  /* ── Step 1 — Upload / Login ── */
   .pz-s1 { align-items: center; justify-content: center; }
-  .pz-login-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 14px; max-width: 360px; text-align: center; padding: 24px;
-  }
+  .pz-login-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 360px; text-align: center; padding: 24px; }
   .pz-login-wrap svg { opacity: .35; }
   .pz-login-wrap h2 { margin: 0; }
   .pz-login-wrap p { opacity: .6; margin: 0; }
@@ -50,48 +44,47 @@
     display: flex; flex-direction: column; align-items: center; gap: 14px;
     border: 2px dashed rgb(var(--color-border-rgb,0 0 0));
     border-radius: 16px; padding: 52px 40px; max-width: 460px; width: 100%;
-    text-align: center; cursor: pointer;
-    transition: border-color .2s, background .2s;
+    text-align: center; cursor: pointer; transition: border-color .2s, background .2s;
   }
-  .pz-dropzone.drag-over {
-    border-color: rgb(var(--color-foreground-rgb,0 0 0));
-    background: rgb(var(--color-foreground-rgb,0 0 0)/.04);
-  }
+  .pz-dropzone.drag-over { border-color: rgb(var(--color-foreground-rgb,0 0 0)); background: rgb(var(--color-foreground-rgb,0 0 0)/.04); }
   .pz-dropzone svg { opacity: .4; }
   .pz-dropzone__title { font-size: var(--font-size--lg); font-weight: 600; margin: 0; }
   .pz-dropzone__sub { font-size: var(--font-size--sm); opacity: .5; margin: 0; }
 
-  /* Step 2 — crop */
+  /* ── Step 2 — Imagem + seletor de enquadramento ── */
   .pz-s2 { flex-direction: row; }
-  .pz-crop-area {
-    flex-shrink: 0; width: 46%; height: 100%;
-    position: relative; overflow: hidden; background: #111;
-    cursor: grab; user-select: none;
+
+  .pz-img-stage {
+    flex-shrink: 0; width: 56%; height: 100%;
+    position: relative; overflow: hidden; background: #1c1c1c;
+    display: flex; align-items: center; justify-content: center;
   }
-  .pz-crop-area.dragging { cursor: grabbing; }
-  #pz-crop-img {
-    position: absolute; top: 0; left: 0;
-    pointer-events: none; user-select: none; display: block;
-    transform-origin: top left;
+  #pz-full-img {
+    display: block; max-width: 100%; max-height: 100%;
+    object-fit: contain; pointer-events: none; user-select: none;
   }
-  #pz-crop-box {
-    position: absolute; z-index: 2; pointer-events: none;
-    border: 1.5px dashed rgba(255,255,255,.75);
-    box-shadow: 0 0 0 2000px rgba(0,0,0,.55);
+  /* frame selector — a janela que define o recorte */
+  #pz-frame-sel {
+    position: absolute; z-index: 2;
+    border: 2px dashed rgba(255,255,255,.85);
+    box-shadow: 0 0 0 2000px rgba(0,0,0,.48);
+    /* grade de terços */
     background-image:
-      linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);
+      linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
     background-size: 33.33% 33.33%;
+    cursor: move;
   }
-  .pz-ch {
-    position: absolute; width: 22px; height: 22px; z-index: 4;
-    border-color: #fff; border-style: solid;
-    touch-action: none;
+  .pz-fsel-ch {
+    position: absolute; z-index: 4;
+    width: 22px; height: 22px;
+    border-color: #fff; border-style: solid; touch-action: none;
   }
-  .pz-ch--nw { border-width: 3px 0 0 3px; cursor: nw-resize; }
-  .pz-ch--ne { border-width: 3px 3px 0 0; cursor: ne-resize; }
-  .pz-ch--sw { border-width: 0 0 3px 3px; cursor: sw-resize; }
-  .pz-ch--se { border-width: 0 3px 3px 0; cursor: se-resize; }
+  .pz-fsel-ch[data-corner="nw"] { border-width: 3px 0 0 3px; cursor: nw-resize; }
+  .pz-fsel-ch[data-corner="ne"] { border-width: 3px 3px 0 0; cursor: ne-resize; }
+  .pz-fsel-ch[data-corner="sw"] { border-width: 0 0 3px 3px; cursor: sw-resize; }
+  .pz-fsel-ch[data-corner="se"] { border-width: 0 3px 3px 0; cursor: se-resize; }
+
   .pz-crop-ctrl {
     flex: 1; min-width: 0; height: 100%;
     display: flex; flex-direction: column; justify-content: center;
@@ -101,43 +94,36 @@
   .pz-crop-ctrl > p { margin: 0; font-size: var(--font-size--sm); opacity: .55; }
   .pz-size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pz-size-card {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 14px 10px;
-    border: 2px solid rgb(var(--color-border-rgb,0 0 0));
-    border-radius: 10px; cursor: pointer;
-    background: transparent; color: inherit; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 10px;
+    border: 2px solid rgb(var(--color-border-rgb,0 0 0)); border-radius: 10px;
+    cursor: pointer; background: transparent; color: inherit; font-family: inherit;
     transition: border-color .15s, background .15s;
   }
   .pz-size-card:hover { border-color: rgb(var(--color-foreground-rgb,0 0 0)/.35); }
-  .pz-size-card.active {
-    border-color: rgb(var(--color-foreground-rgb,0 0 0));
-    background: rgb(var(--color-foreground-rgb,0 0 0)/.04);
-  }
-  .pz-size-card__box {
-    background: rgb(var(--color-foreground-rgb,0 0 0)/.1);
-    border: 1.5px solid rgb(var(--color-foreground-rgb,0 0 0)/.25);
-    border-radius: 2px; flex-shrink: 0;
-  }
+  .pz-size-card.active { border-color: rgb(var(--color-foreground-rgb,0 0 0)); background: rgb(var(--color-foreground-rgb,0 0 0)/.04); }
+  .pz-size-card__box { background: rgb(var(--color-foreground-rgb,0 0 0)/.1); border: 1.5px solid rgb(var(--color-foreground-rgb,0 0 0)/.25); border-radius: 2px; flex-shrink: 0; }
   .pz-size-card__name { font-size: var(--font-size--sm); font-weight: 600; }
 
-  /* Step 3 — frame */
+  /* ── Step 3 — Visualização da moldura ── */
   .pz-s3 { flex-direction: row; }
   .pz-frame-stage {
     flex-shrink: 0; width: 46%; height: 100%;
     overflow: hidden; position: relative; background: #fff;
-  }
-  .pz-frame-inner {
-    width: 100%; height: 100%;
-    padding: 7% 12%; box-sizing: border-box;
     display: flex; align-items: center; justify-content: center;
   }
+  .pz-frame-inner {
+    position: relative;
+    width: 70%; /* proporcional, a altura é definida pelo aspect-ratio */
+    aspect-ratio: var(--pz-ratio, 2/3);
+  }
   .pz-frame-inner img.pz-artwork {
-    width: 100%; height: 100%; display: block;
-    object-fit: cover;
+    position: absolute; inset: 8% 14%; /* margem interna = área visível da moldura */
+    width: calc(100% - 28%); height: calc(100% - 16%);
+    object-fit: cover; display: block;
   }
   img.pz-moldura-img {
     position: absolute; inset: 0; width: 100%; height: 100%;
-    object-fit: fill; pointer-events: none;
+    object-fit: fill; pointer-events: none; z-index: 1;
   }
   .pz-frame-ctrl {
     flex: 1; min-width: 0; height: 100%;
@@ -146,11 +132,7 @@
   }
   .pz-opt-label { font-size: var(--font-size--sm); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin: 0; }
   .pz-swatches { display: flex; gap: 10px; flex-wrap: wrap; }
-  .pz-swatch {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 3px solid transparent; cursor: pointer;
-    transition: border-color .15s, transform .15s; background: none;
-  }
+  .pz-swatch { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: border-color .15s, transform .15s; background: none; }
   .pz-swatch:hover { transform: scale(1.1); }
   .pz-swatch.active { border-color: rgb(var(--color-foreground-rgb,0 0 0)); }
   .pz-swatch--white { background: #f5f5f0; box-shadow: inset 0 0 0 1px rgb(0 0 0/.12); }
@@ -161,47 +143,43 @@
   .pz-buy-btn { width: 100%; justify-content: center; flex-shrink: 0; }
   .pz-buy-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-  /* Footer */
+  /* ── Footer ── */
   .pz-ft {
     flex-shrink: 0; height: 58px;
     display: flex; align-items: center;
-    padding: 0 20px; gap: 12px;
+    padding: 0 16px; gap: 8px;
     border-top: 1px solid rgb(var(--color-border-rgb,0 0 0)/.1);
   }
   .pz-ft__back {
+    min-width: 88px;
     display: flex; align-items: center; gap: 6px;
-    background: none; border: none; cursor: pointer; color: inherit;
-    font-size: var(--font-size--sm); padding: 8px 12px; border-radius: 8px;
-    transition: background .15s; white-space: nowrap; min-width: 80px;
+    background: none; border: none; cursor: pointer;
+    color: inherit; font-family: inherit;
+    font-size: var(--font-size--sm, 14px); font-weight: 500;
+    padding: 8px 12px; border-radius: 8px;
+    transition: background .15s; white-space: nowrap;
   }
   .pz-ft__back:hover { background: rgb(var(--color-foreground-rgb,0 0 0)/.06); }
   .pz-ft__back[hidden] { visibility: hidden; pointer-events: none; }
-  .pz-ft__center {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  }
+  .pz-ft__center { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .pz-ft__dots { display: flex; align-items: center; gap: 5px; }
-  .pz-ft__dot {
-    height: 6px; border-radius: 3px; background: rgb(var(--color-border-rgb,0 0 0)/.3);
-    transition: width .25s, background .25s; width: 6px;
-  }
+  .pz-ft__dot { height: 6px; border-radius: 3px; background: rgb(var(--color-border-rgb,0 0 0)/.3); transition: width .25s, background .25s; width: 6px; }
   .pz-ft__dot.active { width: 20px; background: rgb(var(--color-foreground-rgb,0 0 0)); }
   .pz-ft__label { font-size: 11px; opacity: .5; }
-  .pz-ft__next {
-    display: flex; align-items: center; gap: 6px;
-    white-space: nowrap; min-width: 100px; justify-content: flex-end;
-  }
+  .pz-ft__next { min-width: 88px; display: flex; justify-content: flex-end; }
   .pz-ft__next .button { display: flex; align-items: center; gap: 6px; }
-  .pz-error { font-size: var(--font-size--sm); color: #c0392b; padding: 0 20px 10px; text-align: center; }
+  .pz-error { font-size: var(--font-size--sm); color: #c0392b; padding: 0 20px 8px; text-align: center; flex-shrink: 0; }
   .pz-error[hidden] { display: none; }
 
-  /* Mobile */
+  /* ── Mobile ── */
   @media (max-width: 749px) {
     .pz-modal { padding: 0; align-items: flex-end; }
     .pz-dialog { width: 100%; height: 95dvh; border-radius: 20px 20px 0 0; }
     .pz-s2, .pz-s3 { flex-direction: column; }
-    .pz-crop-area, .pz-frame-stage { width: 100% !important; height: 50%; flex-shrink: 0; }
+    .pz-img-stage, .pz-frame-stage { width: 100% !important; height: 52%; flex-shrink: 0; }
     .pz-crop-ctrl, .pz-frame-ctrl { flex: 1; overflow-y: auto; padding: 14px 16px; }
     .pz-size-grid { grid-template-columns: repeat(4,1fr); }
+    .pz-frame-inner { width: 55%; }
   }
 </style>
 
@@ -241,20 +219,21 @@
       {% endunless %}
     </div>
 
-    <!-- Step 2: Crop tool -->
+    <!-- Step 2: Imagem inteira + seletor de enquadramento -->
     <div class="pz-step pz-s2" id="pz-s2" hidden>
-      <div class="pz-crop-area" id="pz-crop-area">
-        <img id="pz-crop-img" src="" alt="" draggable="false">
-        <div id="pz-crop-box"></div>
-        <div class="pz-ch pz-ch--nw" data-corner="nw"></div>
-        <div class="pz-ch pz-ch--ne" data-corner="ne"></div>
-        <div class="pz-ch pz-ch--sw" data-corner="sw"></div>
-        <div class="pz-ch pz-ch--se" data-corner="se"></div>
+      <div class="pz-img-stage" id="pz-img-stage">
+        <img id="pz-full-img" src="" alt="" draggable="false">
+        <!-- frame selector: a janela que o usuário posiciona sobre a imagem -->
+        <div id="pz-frame-sel"></div>
+        <div class="pz-fsel-ch" data-corner="nw"></div>
+        <div class="pz-fsel-ch" data-corner="ne"></div>
+        <div class="pz-fsel-ch" data-corner="sw"></div>
+        <div class="pz-fsel-ch" data-corner="se"></div>
       </div>
       <div class="pz-crop-ctrl">
         <div>
           <h3>Escolha o tamanho</h3>
-          <p>O recorte se ajusta à proporção do quadro selecionado</p>
+          <p>Posicione e redimensione a janela sobre a parte da imagem que deseja enquadrar</p>
         </div>
         <div class="pz-size-grid" id="pz-size-grid">
           <button class="pz-size-card" data-size="20x30cm" data-w="20" data-h="30" type="button">
@@ -277,13 +256,13 @@
       </div>
     </div>
 
-    <!-- Step 3: Frame preview -->
+    <!-- Step 3: Preview da moldura -->
     <div class="pz-step pz-s3" id="pz-s3" hidden>
       <div class="pz-frame-stage" id="pz-frame-stage">
-        <div class="pz-frame-inner">
+        <div class="pz-frame-inner" id="pz-frame-inner">
           <img class="pz-artwork" id="pz-artwork" src="" alt="">
+          <img class="pz-moldura-img" id="pz-moldura" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="">
         </div>
-        <img class="pz-moldura-img" id="pz-moldura" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="">
       </div>
       <div class="pz-frame-ctrl">
         <div>
@@ -295,7 +274,7 @@
           </div>
         </div>
         <div class="pz-sil-wrap">
-          <img id="pz-tamanho" src="{{ 'tamanho.jpg' | asset_url }}" alt="Comparação de tamanhos">
+          <img src="{{ 'tamanho.jpg' | asset_url }}" alt="Comparação de tamanhos">
         </div>
         <button class="button pz-buy-btn" id="pz-buy" type="button" disabled>Comprar</button>
       </div>
@@ -341,109 +320,91 @@
     oak:   {{ 'moldura_oak_fixed.png'   | asset_url | json }},
   };
 
-  /* ── State ── */
+  /* ── Estado ── */
   let step = 1;
   let objectUrl = null;
   let uploadPromise = null;
-  let selectedSize = null, selW = 2, selH = 3;
-  let selectedFrame = 'white';
-  /* crop box (pixels in crop area) */
-  let bL = 0, bT = 0, bW = 0, bH = 0;
-  /* image position/size */
-  let iX = 0, iY = 0, iW = 0, iH = 0, iSc = 1;
-  /* drag imagem */
-  let dragging = false, dragSX = 0, dragSY = 0, dragIX = 0, dragIY = 0;
-  /* drag canto */
-  let cornerDrag = null, cdSX = 0, cdSY = 0, cdBL = 0, cdBT = 0, cdBW = 0, cdBH = 0;
+  let selW = 2, selH = 3, selectedSize = null, selectedFrame = 'white';
+  /* frame selector: posição e tamanho em px dentro do img-stage */
+  let fL = 0, fT = 0, fW = 0, fH = 0;
+  /* drag frame */
+  let dragFrame = false, dfSX = 0, dfSY = 0, dfFL = 0, dfFT = 0;
+  /* drag corner */
+  let cornerDrag = null, cdSX = 0, cdSY = 0, cdFL = 0, cdFT = 0, cdFW = 0, cdFH = 0;
+  const CH = 11; /* metade de 22px */
 
-  /* ── Elements ── */
+  /* ── Elementos ── */
   const s1         = document.getElementById('pz-s1');
   const s2         = document.getElementById('pz-s2');
   const s3         = document.getElementById('pz-s3');
-  const cropArea   = document.getElementById('pz-crop-area');
-  const cropImg    = document.getElementById('pz-crop-img');
-  const cropBox    = document.getElementById('pz-crop-box');
+  const imgStage   = document.getElementById('pz-img-stage');
+  const fullImg    = document.getElementById('pz-full-img');
+  const frameSel   = document.getElementById('pz-frame-sel');
   const artworkImg = document.getElementById('pz-artwork');
+  const frameInner = document.getElementById('pz-frame-inner');
   const molduraImg = document.getElementById('pz-moldura');
-  const frameStage = document.getElementById('pz-frame-stage');
   const nextBtn    = document.getElementById('pz-next');
   const backBtn    = document.getElementById('pz-back');
   const stepLabel  = document.getElementById('pz-step-label');
   const buyBtn     = document.getElementById('pz-buy');
   const errorEl    = document.getElementById('pz-error');
 
+  const cornerEls = {
+    nw: imgStage.querySelector('[data-corner="nw"]'),
+    ne: imgStage.querySelector('[data-corner="ne"]'),
+    sw: imgStage.querySelector('[data-corner="sw"]'),
+    se: imgStage.querySelector('[data-corner="se"]'),
+  };
+
   /* ── Open / Close ── */
-  function openModal() {
-    modal.removeAttribute('hidden');
-    document.body.classList.add('pz-open');
-  }
-  function closeModal() {
-    modal.setAttribute('hidden', '');
-    document.body.classList.remove('pz-open');
-    resetModal();
-  }
+  function openModal() { modal.removeAttribute('hidden'); document.body.classList.add('pz-open'); }
+  function closeModal() { modal.setAttribute('hidden',''); document.body.classList.remove('pz-open'); resetModal(); }
   function resetModal() {
     if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
-    uploadPromise = null;
-    selectedSize = null; selW = 2; selH = 3;
+    uploadPromise = null; selectedSize = null; selW = 2; selH = 3;
     const fi = document.getElementById('pz-file');
     if (fi) fi.value = '';
     document.querySelectorAll('.pz-size-card').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.pz-swatch').forEach((b, i) => b.classList.toggle('active', i === 0));
-    molduraImg.src = frameUrls.white;
-    selectedFrame = 'white';
+    document.querySelectorAll('.pz-swatch').forEach((b,i) => b.classList.toggle('active', i===0));
+    molduraImg.src = frameUrls.white; selectedFrame = 'white';
     goToStep(1);
   }
 
   document.getElementById('pz-close')?.addEventListener('click', closeModal);
   document.getElementById('pz-backdrop')?.addEventListener('click', closeModal);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && !modal.hidden) closeModal(); });
   document.addEventListener('click', e => {
     const link = e.target.closest('a[href*="/pages/personalizados"]');
     if (!link) return;
-    e.preventDefault();
-    openModal();
+    e.preventDefault(); openModal();
   });
   if (window.location.pathname.includes('/pages/personalizados')) openModal();
 
-  /* ── Navigation ── */
+  /* ── Navegação ── */
   function goToStep(n) {
     step = n;
-    s1.hidden = n !== 1;
-    s2.hidden = n !== 2;
-    s3.hidden = n !== 3;
-    backBtn.hidden = n === 1;
-    [1, 2, 3].forEach(i => {
-      document.getElementById('pz-dot-' + i).classList.toggle('active', i === n);
-    });
-    stepLabel.textContent = 'Etapa ' + n + ' de 3';
-
-    if (n === 1) {
-      nextBtn.textContent = 'Próximo';
+    s1.hidden = n!==1; s2.hidden = n!==2; s3.hidden = n!==3;
+    backBtn.hidden = n===1;
+    [1,2,3].forEach(i => document.getElementById('pz-dot-'+i).classList.toggle('active', i===n));
+    stepLabel.textContent = 'Etapa '+n+' de 3';
+    if (n===1) {
       nextBtn.innerHTML = 'Próximo <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      nextBtn.disabled = !objectUrl;
-      nextBtn.style.display = '';
-      buyBtn.style.display = 'none';
-    } else if (n === 2) {
+      nextBtn.disabled = !objectUrl; nextBtn.style.display=''; buyBtn.style.display='none';
+    } else if (n===2) {
       nextBtn.innerHTML = 'Próximo <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      nextBtn.disabled = !selectedSize;
-      nextBtn.style.display = '';
-      buyBtn.style.display = 'none';
-      if (objectUrl && cropImg.complete && cropImg.naturalWidth) initCrop();
-    } else if (n === 3) {
-      nextBtn.style.display = 'none';
-      buyBtn.style.display = '';
-      buyBtn.disabled = false;
+      nextBtn.disabled = !selectedSize; nextBtn.style.display=''; buyBtn.style.display='none';
+      if (objectUrl && fullImg.complete && fullImg.naturalWidth) {
+        requestAnimationFrame(initFrameSel);
+      }
+    } else {
+      nextBtn.style.display='none'; buyBtn.style.display=''; buyBtn.disabled=false;
       syncArtwork();
     }
-    if (errorEl) errorEl.hidden = true;
+    if (errorEl) errorEl.hidden=true;
   }
 
-  backBtn.addEventListener('click', () => goToStep(step - 1));
-  nextBtn.addEventListener('click', () => {
-    if (step === 2 && !selectedSize) return;
-    goToStep(step + 1);
-  });
+  backBtn.addEventListener('click', () => goToStep(step-1));
+  nextBtn.addEventListener('click', () => { if (step===2 && !selectedSize) return; goToStep(step+1); });
 
   /* ── Upload ── */
   const fileInput = document.getElementById('pz-file');
@@ -464,255 +425,206 @@
   function handleFile(file) {
     if (objectUrl) URL.revokeObjectURL(objectUrl);
     objectUrl = URL.createObjectURL(file);
-    cropImg.src = objectUrl;
+    fullImg.src = objectUrl;
     uploadPromise = uploadToCloudinary(file);
-    /* auto-advance once image metadata is loaded */
-    cropImg.onload = () => {
-      cropImg.onload = null;
-      goToStep(2);
-      initCrop();
-    };
+    fullImg.onload = () => { fullImg.onload=null; goToStep(2); };
   }
 
   async function uploadToCloudinary(file) {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('upload_preset', 'ipaperclub');
-    const res = await fetch('https://api.cloudinary.com/v1_1/dp9wibnvk/image/upload', { method: 'POST', body: fd });
-    if (!res.ok) throw new Error('upload ' + res.status);
+    const res = await fetch('https://api.cloudinary.com/v1_1/dp9wibnvk/image/upload', { method:'POST', body:fd });
+    if (!res.ok) throw new Error('upload '+res.status);
     return (await res.json()).secure_url;
   }
 
-  /* ── Crop engine ── */
-  function initCrop() {
-    const aW = cropArea.offsetWidth, aH = cropArea.offsetHeight;
-    if (!aW || !aH) return;
-    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
-    if (!nW || !nH) return;
-    const fR = selW / selH;
-    const pad = 0.84;
-    if (aW / aH > fR) { bH = aH * pad; bW = bH * fR; }
-    else              { bW = aW * pad; bH = bW / fR; }
-    bL = (aW - bW) / 2; bT = (aH - bH) / 2;
-    /* escala a imagem para cobrir TODA a área, não só o crop box → sem barras pretas */
-    iSc = Math.max(aW / nW, aH / nH);
-    iW = nW * iSc; iH = nH * iSc;
-    iX = (aW - iW) / 2;
-    iY = (aH - iH) / 2;
-    constrainImg();
-    applyDom();
+  /* ── Frame selector ── */
+  function getImgBounds() {
+    const sw = imgStage.offsetWidth, sh = imgStage.offsetHeight;
+    const nW = fullImg.naturalWidth  || 1;
+    const nH = fullImg.naturalHeight || 1;
+    const sc = Math.min(sw/nW, sh/nH);
+    const iw = nW*sc, ih = nH*sc;
+    return { offX:(sw-iw)/2, offY:(sh-ih)/2, iw, ih, sc };
   }
 
-  function constrainImg() {
-    iX = clamp(iX, bL + bW - iW, bL);
-    iY = clamp(iY, bT + bH - iH, bT);
+  function initFrameSel() {
+    const b = getImgBounds();
+    if (!b.iw) return;
+    const fR = selW/selH;
+    const pad = 0.82;
+    if (b.iw/b.ih > fR) { fH=b.ih*pad; fW=fH*fR; }
+    else                { fW=b.iw*pad; fH=fW/fR; }
+    fL = b.offX + (b.iw-fW)/2;
+    fT = b.offY + (b.ih-fH)/2;
+    constrainFrame();
+    applyFrameDom();
   }
 
-  const cornerEls = {
-    nw: cropArea.querySelector('[data-corner="nw"]'),
-    ne: cropArea.querySelector('[data-corner="ne"]'),
-    sw: cropArea.querySelector('[data-corner="sw"]'),
-    se: cropArea.querySelector('[data-corner="se"]'),
-  };
-  const CH = 11; /* metade do handle (22px / 2) */
+  function constrainFrame() {
+    const b = getImgBounds();
+    fL = clamp(fL, b.offX, b.offX+b.iw-fW);
+    fT = clamp(fT, b.offY, b.offY+b.ih-fH);
+  }
 
-  function applyDom() {
-    cropImg.style.width  = iW + 'px';
-    cropImg.style.height = iH + 'px';
-    cropImg.style.transform = 'translate(' + iX + 'px,' + iY + 'px)';
-    cropBox.style.left   = bL + 'px';
-    cropBox.style.top    = bT + 'px';
-    cropBox.style.width  = bW + 'px';
-    cropBox.style.height = bH + 'px';
-    /* posiciona os cantos centrados nos vértices do crop box */
-    cornerEls.nw.style.left = (bL - CH) + 'px'; cornerEls.nw.style.top = (bT - CH) + 'px';
-    cornerEls.ne.style.left = (bL + bW - CH) + 'px'; cornerEls.ne.style.top = (bT - CH) + 'px';
-    cornerEls.sw.style.left = (bL - CH) + 'px'; cornerEls.sw.style.top = (bT + bH - CH) + 'px';
-    cornerEls.se.style.left = (bL + bW - CH) + 'px'; cornerEls.se.style.top = (bT + bH - CH) + 'px';
+  function applyFrameDom() {
+    frameSel.style.left=fL+'px'; frameSel.style.top=fT+'px';
+    frameSel.style.width=fW+'px'; frameSel.style.height=fH+'px';
+    cornerEls.nw.style.left=(fL-CH)+'px'; cornerEls.nw.style.top=(fT-CH)+'px';
+    cornerEls.ne.style.left=(fL+fW-CH)+'px'; cornerEls.ne.style.top=(fT-CH)+'px';
+    cornerEls.sw.style.left=(fL-CH)+'px'; cornerEls.sw.style.top=(fT+fH-CH)+'px';
+    cornerEls.se.style.left=(fL+fW-CH)+'px'; cornerEls.se.style.top=(fT+fH-CH)+'px';
   }
 
   function getCropParams() {
-    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
-    if (!nW) return null;
+    const b = getImgBounds();
     return {
-      x: Math.round((bL - iX) / iSc),
-      y: Math.round((bT - iY) / iSc),
-      w: Math.round(bW / iSc),
-      h: Math.round(bH / iSc),
+      x: Math.max(0, Math.round((fL-b.offX)/b.sc)),
+      y: Math.max(0, Math.round((fT-b.offY)/b.sc)),
+      w: Math.round(fW/b.sc),
+      h: Math.round(fH/b.sc),
     };
   }
 
-  /* ── Redimensionar crop box pelos cantos ── */
-  function applyCornerDrag(dx, dy) {
-    const aW = cropArea.offsetWidth, aH = cropArea.offsetHeight;
-    const fR = selW / selH;
-    const MIN = 80;
-    let nBL = cdBL, nBT = cdBT, nBW = cdBW, nBH = cdBH;
+  /* drag — mover frame selector */
+  frameSel.addEventListener('mousedown', e => {
+    e.preventDefault();
+    dragFrame=true; dfSX=e.clientX; dfSY=e.clientY; dfFL=fL; dfFT=fT;
+    imgStage.style.cursor='grabbing';
+  });
+  frameSel.addEventListener('touchstart', e => {
+    e.preventDefault(); e.stopPropagation();
+    const t=e.touches[0];
+    dragFrame=true; dfSX=t.clientX; dfSY=t.clientY; dfFL=fL; dfFT=fT;
+  }, {passive:false});
 
-    if (cornerDrag === 'se') {
-      nBW = cdBW + dx;
-    } else if (cornerDrag === 'sw') {
-      nBW = cdBW - dx;
-      nBL = cdBL + cdBW - nBW;
-    } else if (cornerDrag === 'ne') {
-      nBW = cdBW + dx;
-      nBH = nBW / fR;
-      nBT = cdBT + cdBH - nBH;
-    } else if (cornerDrag === 'nw') {
-      nBW = cdBW - dx;
-      nBL = cdBL + cdBW - nBW;
-      nBH = nBW / fR;
-      nBT = cdBT + cdBH - nBH;
-    }
-    nBW = Math.max(MIN, nBW);
-    nBH = nBW / fR;
+  /* drag — redimensionar pelos cantos */
+  function applyCornerDrag(dx) {
+    const b = getImgBounds();
+    const fR = selW/selH;
+    const MIN = 60;
+    let nFL=cdFL, nFT=cdFT, nFW=cdFW, nFH=cdFH;
 
-    /* recalcula nBT para NE/NW depois do clamp */
-    if (cornerDrag === 'ne' || cornerDrag === 'nw') {
-      nBT = cdBT + cdBH - nBH;
-    }
+    if (cornerDrag==='se')      { nFW=cdFW+dx; }
+    else if (cornerDrag==='sw') { nFW=cdFW-dx; nFL=cdFL+cdFW-nFW; }
+    else if (cornerDrag==='ne') { nFW=cdFW+dx; }
+    else if (cornerDrag==='nw') { nFW=cdFW-dx; nFL=cdFL+cdFW-nFW; }
 
-    /* mantém dentro da área */
-    if (nBL < 0) { nBW += nBL; nBL = 0; nBH = nBW / fR; }
-    if (nBT < 0) { nBH += nBT; nBT = 0; nBW = nBH * fR; }
-    if (nBL + nBW > aW) nBW = aW - nBL;
-    if (nBT + nBH > aH) nBH = aH - nBT;
+    nFW = Math.max(MIN, nFW);
+    nFH = nFW/fR;
 
-    bL = nBL; bT = nBT; bW = nBW; bH = nBH;
+    /* para cantos de cima: ajusta topo */
+    if (cornerDrag==='ne'||cornerDrag==='nw') nFT = cdFT+cdFH-nFH;
 
-    /* garante que a imagem cobre o novo crop box */
-    const minSc = Math.max(bW / cropImg.naturalWidth, bH / cropImg.naturalHeight);
-    if (iSc < minSc) {
-      iSc = minSc;
-      iW = cropImg.naturalWidth * iSc;
-      iH = cropImg.naturalHeight * iSc;
-    }
-    constrainImg(); applyDom();
+    /* constrain dentro da imagem */
+    nFL = clamp(nFL, b.offX, b.offX+b.iw-nFW);
+    nFT = clamp(nFT, b.offY, b.offY+b.ih-nFH);
+    nFW = Math.min(nFW, b.offX+b.iw-nFL);
+    nFH = nFW/fR;
+
+    fL=nFL; fT=nFT; fW=nFW; fH=nFH;
+    applyFrameDom();
   }
 
   Object.values(cornerEls).forEach(el => {
     el.addEventListener('mousedown', e => {
       e.preventDefault(); e.stopPropagation();
-      cornerDrag = el.dataset.corner;
-      cdSX = e.clientX; cdSY = e.clientY;
-      cdBL = bL; cdBT = bT; cdBW = bW; cdBH = bH;
+      cornerDrag=el.dataset.corner;
+      cdSX=e.clientX; cdSY=e.clientY;
+      cdFL=fL; cdFT=fT; cdFW=fW; cdFH=fH;
     });
     el.addEventListener('touchstart', e => {
       e.preventDefault(); e.stopPropagation();
-      cornerDrag = el.dataset.corner;
-      const t = e.touches[0];
-      cdSX = t.clientX; cdSY = t.clientY;
-      cdBL = bL; cdBT = bT; cdBW = bW; cdBH = bH;
-    }, { passive: false });
+      cornerDrag=el.dataset.corner;
+      const t=e.touches[0];
+      cdSX=t.clientX; cdSY=t.clientY;
+      cdFL=fL; cdFT=fT; cdFW=fW; cdFH=fH;
+    }, {passive:false});
   });
 
-  /* drag on crop area (imagem) */
-  cropArea.addEventListener('mousedown', e => {
-    if (e.target.dataset.corner) return;
-    e.preventDefault();
-    dragging = true; dragSX = e.clientX; dragSY = e.clientY;
-    dragIX = iX; dragIY = iY;
-    cropArea.classList.add('dragging');
-  });
   window.addEventListener('mousemove', e => {
-    if (cornerDrag) {
-      applyCornerDrag(e.clientX - cdSX, e.clientY - cdSY);
-    } else if (dragging) {
-      iX = dragIX + (e.clientX - dragSX);
-      iY = dragIY + (e.clientY - dragSY);
-      constrainImg(); applyDom();
+    if (cornerDrag)   { applyCornerDrag(e.clientX-cdSX); }
+    else if (dragFrame) {
+      fL=dfFL+(e.clientX-dfSX); fT=dfFT+(e.clientY-dfSY);
+      constrainFrame(); applyFrameDom();
     }
   });
   window.addEventListener('mouseup', () => {
-    dragging = false; cornerDrag = null;
-    cropArea.classList.remove('dragging');
+    dragFrame=false; cornerDrag=null; imgStage.style.cursor='';
   });
-  cropArea.addEventListener('touchstart', e => {
-    if (e.target.dataset.corner) return;
+  imgStage.addEventListener('touchmove', e => {
     e.preventDefault();
-    const t = e.touches[0];
-    dragging = true; dragSX = t.clientX; dragSY = t.clientY;
-    dragIX = iX; dragIY = iY;
-  }, { passive: false });
-  cropArea.addEventListener('touchmove', e => {
-    e.preventDefault();
-    const t = e.touches[0];
-    if (cornerDrag) {
-      applyCornerDrag(t.clientX - cdSX, t.clientY - cdSY);
-    } else if (dragging) {
-      iX = dragIX + (t.clientX - dragSX);
-      iY = dragIY + (t.clientY - dragSY);
-      constrainImg(); applyDom();
+    const t=e.touches[0];
+    if (cornerDrag)   { applyCornerDrag(t.clientX-cdSX); }
+    else if (dragFrame) {
+      fL=dfFL+(t.clientX-dfSX); fT=dfFT+(t.clientY-dfSY);
+      constrainFrame(); applyFrameDom();
     }
-  }, { passive: false });
-  cropArea.addEventListener('touchend', () => { dragging = false; cornerDrag = null; });
+  }, {passive:false});
+  imgStage.addEventListener('touchend', () => { dragFrame=false; cornerDrag=null; });
 
-  /* ── Size selection ── */
+  /* ── Seleção de tamanho ── */
   document.getElementById('pz-size-grid')?.querySelectorAll('.pz-size-card').forEach(btn => {
     btn.addEventListener('click', () => {
-      selectedSize = btn.dataset.size;
-      selW = +btn.dataset.w;
-      selH = +btn.dataset.h;
-      document.querySelectorAll('.pz-size-card').forEach(b => b.classList.toggle('active', b === btn));
-      nextBtn.disabled = false;
-      initCrop();
+      selectedSize=btn.dataset.size; selW=+btn.dataset.w; selH=+btn.dataset.h;
+      document.querySelectorAll('.pz-size-card').forEach(b => b.classList.toggle('active', b===btn));
+      /* atualiza aspect-ratio do frame inner no step 3 */
+      frameInner.style.setProperty('--pz-ratio', selW+'/'+selH);
+      nextBtn.disabled=false;
+      initFrameSel();
     });
   });
 
-  /* ── Frame (step 3) ── */
+  /* ── Step 3 — Preview ── */
   function syncArtwork() {
     if (!objectUrl) return;
     const cp = getCropParams();
-    artworkImg.style.objectPosition = '50% 50%';
+    artworkImg.style.objectPosition='50% 50%';
     artworkImg.src = objectUrl;
-    /* aguarda a imagem carregar E o layout ser calculado */
-    artworkImg.onload = function () {
-      artworkImg.onload = null;
-      requestAnimationFrame(function () {
+    artworkImg.onload = function() {
+      artworkImg.onload=null;
+      requestAnimationFrame(function() {
         if (!cp) return;
-        const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
-        const fW = artworkImg.offsetWidth  || 1;
-        const fH = artworkImg.offsetHeight || 1;
-        const cs = Math.max(fW / nW, fH / nH);
-        const ovX = nW * cs - fW;
-        const ovY = nH * cs - fH;
-        const posX = ovX > 0 ? clamp(cp.x * cs / ovX * 100, 0, 100) : 50;
-        const posY = ovY > 0 ? clamp(cp.y * cs / ovY * 100, 0, 100) : 50;
-        artworkImg.style.objectPosition = posX + '% ' + posY + '%';
+        const nW=fullImg.naturalWidth, nH=fullImg.naturalHeight;
+        const fw=artworkImg.offsetWidth||1, fh=artworkImg.offsetHeight||1;
+        const cs=Math.max(fw/nW, fh/nH);
+        const ovX=nW*cs-fw, ovY=nH*cs-fh;
+        const posX = ovX>0 ? clamp(cp.x*cs/ovX*100, 0, 100) : 50;
+        const posY = ovY>0 ? clamp(cp.y*cs/ovY*100, 0, 100) : 50;
+        artworkImg.style.objectPosition = posX+'% '+posY+'%';
       });
     };
-    buyBtn.disabled = false;
+    buyBtn.disabled=false;
   }
 
   document.querySelectorAll('.pz-swatch').forEach(btn => {
     btn.addEventListener('click', () => {
-      selectedFrame = btn.dataset.frame;
-      molduraImg.src = frameUrls[selectedFrame] || '';
-      document.getElementById('pz-frame-label').textContent = btn.dataset.label;
-      document.querySelectorAll('.pz-swatch').forEach(s => s.classList.toggle('active', s === btn));
+      selectedFrame=btn.dataset.frame;
+      molduraImg.src=frameUrls[selectedFrame]||'';
+      document.getElementById('pz-frame-label').textContent=btn.dataset.label;
+      document.querySelectorAll('.pz-swatch').forEach(s => s.classList.toggle('active', s===btn));
     });
   });
 
-  /* ── Buy ── */
+  /* ── Comprar ── */
   buyBtn.addEventListener('click', addToCart);
 
   async function addToCart() {
-    buyBtn.disabled = true;
-    buyBtn.textContent = 'Enviando imagem…';
-    if (errorEl) errorEl.hidden = true;
+    buyBtn.disabled=true; buyBtn.textContent='Enviando imagem…';
+    if (errorEl) errorEl.hidden=true;
 
     let imageUrl;
-    try {
-      imageUrl = await uploadPromise;
-    } catch (err) {
-      showError('Erro ao enviar a imagem. Verifique sua conexão e tente novamente.');
-      buyBtn.disabled = false; buyBtn.textContent = 'Comprar'; return;
+    try { imageUrl = await uploadPromise; }
+    catch {
+      showError('Erro ao enviar a imagem. Verifique o preset do Cloudinary (deve ser "Unsigned").');
+      buyBtn.disabled=false; buyBtn.textContent='Comprar'; return;
     }
 
     const cp = getCropParams();
     const finalUrl = buildCroppedUrl(imageUrl, cp);
 
-    buyBtn.textContent = 'Adicionando ao carrinho…';
+    buyBtn.textContent='Adicionando ao carrinho…';
     let product;
     try {
       const r = await fetch('/products/quadro-personalizado.js');
@@ -720,49 +632,41 @@
       product = await r.json();
     } catch {
       showError('Produto não encontrado. Entre em contato com o suporte.');
-      buyBtn.disabled = false; buyBtn.textContent = 'Comprar'; return;
+      buyBtn.disabled=false; buyBtn.textContent='Comprar'; return;
     }
 
-    const frameLabel = { white: 'Branca', black: 'Preta', oak: 'Madeira' }[selectedFrame];
+    const frameLabel = {white:'Branca',black:'Preta',oak:'Madeira'}[selectedFrame];
     const variant = product.variants.find(v => {
-      const opts = [v.option1, v.option2, v.option3].filter(Boolean);
+      const opts=[v.option1,v.option2,v.option3].filter(Boolean);
       return opts.includes(selectedSize) && opts.includes(frameLabel);
     });
     if (!variant) {
       showError('Combinação indisponível. Tente outra opção.');
-      buyBtn.disabled = false; buyBtn.textContent = 'Comprar'; return;
+      buyBtn.disabled=false; buyBtn.textContent='Comprar'; return;
     }
 
     try {
       const r = await fetch('/cart/add.js', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: [{ id: variant.id, quantity: 1, properties: {
-            'Imagem personalizada': finalUrl,
-            'Tamanho': selectedSize,
-            'Moldura': frameLabel,
-          }}],
-        }),
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ items:[{ id:variant.id, quantity:1, properties:{
+          'Imagem personalizada':finalUrl, 'Tamanho':selectedSize, 'Moldura':frameLabel
+        }}]}),
       });
-      if (!r.ok) throw new Error();
-      window.location.href = '/cart';
-    } catch {
-      showError('Erro ao adicionar ao carrinho. Tente novamente.');
-      buyBtn.disabled = false; buyBtn.textContent = 'Comprar';
+      if (!r.ok) throw new Error(await r.text());
+      window.location.href='/cart';
+    } catch(err) {
+      showError('Erro ao adicionar ao carrinho. Verifique o estoque das variantes.');
+      buyBtn.disabled=false; buyBtn.textContent='Comprar';
     }
   }
 
   function buildCroppedUrl(url, cp) {
-    if (!cp || (!cp.x && !cp.y)) return url;
-    return url.replace('/upload/', '/upload/c_crop,x_' + cp.x + ',y_' + cp.y + ',w_' + cp.w + ',h_' + cp.h + '/');
+    if (!cp||(!cp.x&&!cp.y)) return url;
+    return url.replace('/upload/', '/upload/c_crop,x_'+cp.x+',y_'+cp.y+',w_'+cp.w+',h_'+cp.h+'/');
   }
 
-  function showError(msg) {
-    if (!errorEl) return;
-    errorEl.textContent = msg;
-    errorEl.hidden = false;
-  }
+  function showError(msg) { if (!errorEl) return; errorEl.textContent=msg; errorEl.hidden=false; }
 
   goToStep(1);
 })();
