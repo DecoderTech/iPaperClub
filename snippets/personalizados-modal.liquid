@@ -1,211 +1,217 @@
 <style>
-  body.pz-modal-open { overflow: hidden; }
+  body.pz-open { overflow: hidden; }
 
-  /* ── Modal shell ── */
-  .pz-modal {
-    position: fixed; inset: 0; z-index: 10000;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-  }
+  .pz-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; }
   .pz-modal[hidden] { display: none !important; }
-  .pz-modal__backdrop { position: absolute; inset: 0; background: rgb(0 0 0 / 0.55); cursor: pointer; }
-  .pz-modal__dialog {
-    position: relative;
-    background: rgb(var(--color-background-rgb, 255 255 255));
-    width: min(95vw, 980px);
-    height: min(92vh, 720px);
-    border-radius: 16px;
-    box-shadow: 0 24px 80px rgb(0 0 0 / 0.3);
-    display: flex; flex-direction: column;
-    overflow: hidden;
+  .pz-backdrop { position: absolute; inset: 0; background: rgb(0 0 0/.6); cursor: pointer; }
+  .pz-dialog {
+    position: relative; z-index: 1;
+    background: rgb(var(--color-background-rgb,255 255 255));
+    width: min(96vw, 980px); height: min(94vh, 720px);
+    border-radius: 16px; box-shadow: 0 24px 80px rgb(0 0 0/.35);
+    display: flex; flex-direction: column; overflow: hidden;
   }
 
-  /* ── Header ── */
-  .pz-mh {
-    flex-shrink: 0; height: 52px;
+  /* Header */
+  .pz-hd {
+    flex-shrink: 0; height: 54px;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 16px;
-    border-bottom: 1px solid rgb(var(--color-border-rgb, 0 0 0) / 0.1);
+    padding: 0 20px;
+    border-bottom: 1px solid rgb(var(--color-border-rgb,0 0 0)/.1);
   }
-  .pz-mh__back {
-    display: flex; align-items: center; gap: 6px;
+  .pz-hd__title {
+    font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    margin: 0;
+  }
+  .pz-hd__close {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
     background: none; border: none; cursor: pointer; color: inherit;
-    font-size: var(--font-size--sm); padding: 6px 10px; border-radius: 6px;
-    transition: background 0.15s; min-width: 80px;
+    transition: background .15s;
   }
-  .pz-mh__back:hover { background: rgb(var(--color-foreground-rgb) / 0.06); }
-  .pz-mh__back[hidden] { visibility: hidden; pointer-events: none; }
-  .pz-mh__steps { display: flex; align-items: center; gap: 6px; }
-  .pz-mh__dot {
-    height: 7px; border-radius: 4px; background: rgb(var(--color-border-rgb) / 0.3);
-    transition: width 0.25s, background 0.25s; width: 7px;
-  }
-  .pz-mh__dot.active { width: 22px; background: rgb(var(--color-foreground-rgb)); }
-  .pz-mh__close {
-    display: flex; align-items: center; justify-content: flex-end;
-    width: 36px; height: 36px; min-width: 80px;
-    background: none; border: none; cursor: pointer; color: inherit;
-    border-radius: 50%; transition: background 0.15s;
-  }
-  .pz-mh__close:hover { background: rgb(var(--color-foreground-rgb) / 0.08); }
+  .pz-hd__close:hover { background: rgb(var(--color-foreground-rgb,0 0 0)/.08); }
 
-  /* ── Steps ── */
+  /* Steps */
   .pz-step { flex: 1; min-height: 0; overflow: hidden; display: flex; }
   .pz-step[hidden] { display: none !important; }
 
-  /* Step 1 – Upload / Login */
+  /* Step 1 */
   .pz-s1 { align-items: center; justify-content: center; }
   .pz-login-wrap {
     display: flex; flex-direction: column; align-items: center;
     gap: 14px; max-width: 360px; text-align: center; padding: 24px;
   }
-  .pz-login-wrap svg { opacity: 0.35; }
+  .pz-login-wrap svg { opacity: .35; }
   .pz-login-wrap h2 { margin: 0; }
-  .pz-login-wrap p { opacity: 0.6; margin: 0; }
+  .pz-login-wrap p { opacity: .6; margin: 0; }
   .pz-login-btns { display: flex; flex-direction: column; gap: 8px; width: 100%; }
   .pz-login-btns .button { width: 100%; justify-content: center; }
   .pz-dropzone {
-    display: flex; flex-direction: column; align-items: center; gap: 12px;
-    border: 2px dashed rgb(var(--color-border-rgb));
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    border: 2px dashed rgb(var(--color-border-rgb,0 0 0));
     border-radius: 16px; padding: 52px 40px; max-width: 460px; width: 100%;
     text-align: center; cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color .2s, background .2s;
   }
   .pz-dropzone.drag-over {
-    border-color: rgb(var(--color-foreground-rgb));
-    background: rgb(var(--color-foreground-rgb) / 0.04);
+    border-color: rgb(var(--color-foreground-rgb,0 0 0));
+    background: rgb(var(--color-foreground-rgb,0 0 0)/.04);
   }
-  .pz-dropzone svg { opacity: 0.4; }
+  .pz-dropzone svg { opacity: .4; }
   .pz-dropzone__title { font-size: var(--font-size--lg); font-weight: 600; margin: 0; }
-  .pz-dropzone__hint { font-size: var(--font-size--sm); opacity: 0.5; margin: 0; }
+  .pz-dropzone__sub { font-size: var(--font-size--sm); opacity: .5; margin: 0; }
 
-  /* Step 2 – Crop */
+  /* Step 2 — crop */
   .pz-s2 { flex-direction: row; }
-  .pz-crop-stage {
-    flex-shrink: 0; height: 100%;
-    aspect-ratio: var(--pz-ratio, 2/3);
-    overflow: hidden; position: relative; background: #0a0a0a; cursor: grab;
+  .pz-crop-area {
+    flex-shrink: 0; width: 46%; height: 100%;
+    position: relative; overflow: hidden; background: #111;
+    cursor: grab; user-select: none;
   }
-  .pz-crop-stage.dragging { cursor: grabbing; }
-  .pz-crop-stage img {
-    width: 100%; height: 100%;
-    object-fit: cover; object-position: 50% 50%;
+  .pz-crop-area.dragging { cursor: grabbing; }
+  #pz-crop-img {
+    position: absolute; top: 0; left: 0;
     pointer-events: none; user-select: none; display: block;
+    transform-origin: top left;
   }
-  .pz-crop-overlay-hint {
-    position: absolute; bottom: 10px; left: 0; right: 0; text-align: center;
-    font-size: 11px; color: #fff; opacity: 0.65; pointer-events: none;
+  #pz-crop-box {
+    position: absolute; z-index: 2; pointer-events: none;
+    border: 1.5px dashed rgba(255,255,255,.75);
+    box-shadow: 0 0 0 2000px rgba(0,0,0,.55);
+    background-image:
+      linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);
+    background-size: 33.33% 33.33%;
   }
-  .pz-crop-controls {
+  .pz-ch {
+    position: absolute; width: 18px; height: 18px;
+    border-color: #fff; border-style: solid;
+  }
+  .pz-ch--nw { top: -1px; left: -1px; border-width: 3px 0 0 3px; }
+  .pz-ch--ne { top: -1px; right: -1px; border-width: 3px 3px 0 0; }
+  .pz-ch--sw { bottom: -1px; left: -1px; border-width: 0 0 3px 3px; }
+  .pz-ch--se { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+  .pz-crop-ctrl {
     flex: 1; min-width: 0; height: 100%;
     display: flex; flex-direction: column; justify-content: center;
-    padding: 32px 36px; gap: 24px;
+    padding: 28px 32px; gap: 20px; overflow: hidden;
   }
-  .pz-crop-controls h3 { margin: 0; font-size: var(--font-size--lg); }
-  .pz-crop-controls p { margin: 0; font-size: var(--font-size--sm); opacity: 0.55; }
+  .pz-crop-ctrl h3 { margin: 0; }
+  .pz-crop-ctrl > p { margin: 0; font-size: var(--font-size--sm); opacity: .55; }
   .pz-size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pz-size-card {
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
     padding: 14px 10px;
-    border: 2px solid rgb(var(--color-border-rgb));
+    border: 2px solid rgb(var(--color-border-rgb,0 0 0));
     border-radius: 10px; cursor: pointer;
     background: transparent; color: inherit; font-family: inherit;
-    transition: border-color 0.15s, background 0.15s;
+    transition: border-color .15s, background .15s;
   }
-  .pz-size-card:hover { border-color: rgb(var(--color-foreground-rgb) / 0.35); }
+  .pz-size-card:hover { border-color: rgb(var(--color-foreground-rgb,0 0 0)/.35); }
   .pz-size-card.active {
-    border-color: rgb(var(--color-foreground-rgb));
-    background: rgb(var(--color-foreground-rgb) / 0.04);
+    border-color: rgb(var(--color-foreground-rgb,0 0 0));
+    background: rgb(var(--color-foreground-rgb,0 0 0)/.04);
   }
   .pz-size-card__box {
-    background: rgb(var(--color-foreground-rgb) / 0.1);
-    border: 1.5px solid rgb(var(--color-foreground-rgb) / 0.25);
-    border-radius: 3px; flex-shrink: 0;
+    background: rgb(var(--color-foreground-rgb,0 0 0)/.1);
+    border: 1.5px solid rgb(var(--color-foreground-rgb,0 0 0)/.25);
+    border-radius: 2px; flex-shrink: 0;
   }
   .pz-size-card__name { font-size: var(--font-size--sm); font-weight: 600; }
 
-  /* Step 3 – Frame */
+  /* Step 3 — frame */
   .pz-s3 { flex-direction: row; }
   .pz-frame-stage {
-    flex-shrink: 0; height: 100%;
-    aspect-ratio: var(--pz-ratio, 2/3);
+    flex-shrink: 0; width: 46%; height: 100%;
     overflow: hidden; position: relative; background: #fff;
   }
   .pz-frame-inner {
     width: 100%; height: 100%;
-    padding: 6% 11%; box-sizing: border-box;
+    padding: 7% 12%; box-sizing: border-box;
     display: flex; align-items: center; justify-content: center;
   }
-  .pz-frame-inner img.artwork {
-    width: 100%; height: 100%;
-    object-fit: cover; object-position: 50% 50%;
-    display: block;
+  .pz-frame-inner img.pz-artwork {
+    width: 100%; height: 100%; display: block;
+    object-fit: cover;
   }
-  img.pz-moldura {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
+  img.pz-moldura-img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: fill; pointer-events: none;
   }
-  .pz-frame-controls {
+  .pz-frame-ctrl {
     flex: 1; min-width: 0; height: 100%;
     display: flex; flex-direction: column;
-    padding: 24px 32px; gap: 16px; overflow: hidden;
+    padding: 24px 28px; gap: 18px; overflow: hidden;
   }
-  .pz-opt-label { font-size: var(--font-size--sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
-  .pz-swatches { display: flex; gap: 10px; }
+  .pz-opt-label { font-size: var(--font-size--sm); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin: 0; }
+  .pz-swatches { display: flex; gap: 10px; flex-wrap: wrap; }
   .pz-swatch {
     width: 36px; height: 36px; border-radius: 50%;
     border: 3px solid transparent; cursor: pointer;
-    transition: border-color 0.15s, transform 0.15s;
-    background: none;
+    transition: border-color .15s, transform .15s; background: none;
   }
   .pz-swatch:hover { transform: scale(1.1); }
-  .pz-swatch.active { border-color: rgb(var(--color-foreground-rgb)); }
-  .pz-swatch--white { background: #f5f5f0; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12); }
+  .pz-swatch.active { border-color: rgb(var(--color-foreground-rgb,0 0 0)); }
+  .pz-swatch--white { background: #f5f5f0; box-shadow: inset 0 0 0 1px rgb(0 0 0/.12); }
   .pz-swatch--black { background: #1a1a1a; }
-  .pz-swatch--oak { background: linear-gradient(135deg, #c8a46e 0%, #a07840 50%, #c8a46e 100%); }
+  .pz-swatch--oak { background: linear-gradient(135deg,#c8a46e 0%,#a07840 50%,#c8a46e 100%); }
   .pz-sil-wrap { flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: flex-end; }
   .pz-sil-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; object-position: bottom left; display: block; }
   .pz-buy-btn { width: 100%; justify-content: center; flex-shrink: 0; }
-  .pz-buy-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .pz-buy-btn:disabled { opacity: .45; cursor: not-allowed; }
 
   /* Footer */
-  .pz-mf {
-    flex-shrink: 0; height: 60px;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 24px; gap: 16px;
-    border-top: 1px solid rgb(var(--color-border-rgb) / 0.1);
+  .pz-ft {
+    flex-shrink: 0; height: 58px;
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 12px;
+    border-top: 1px solid rgb(var(--color-border-rgb,0 0 0)/.1);
   }
-  .pz-mf__hint { font-size: var(--font-size--sm); opacity: 0.5; flex: 1; min-width: 0; }
-  .pz-mf__error { font-size: var(--font-size--sm); color: #c0392b; flex: 1; min-width: 0; }
+  .pz-ft__back {
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: none; cursor: pointer; color: inherit;
+    font-size: var(--font-size--sm); padding: 8px 12px; border-radius: 8px;
+    transition: background .15s; white-space: nowrap; min-width: 80px;
+  }
+  .pz-ft__back:hover { background: rgb(var(--color-foreground-rgb,0 0 0)/.06); }
+  .pz-ft__back[hidden] { visibility: hidden; pointer-events: none; }
+  .pz-ft__center {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .pz-ft__dots { display: flex; align-items: center; gap: 5px; }
+  .pz-ft__dot {
+    height: 6px; border-radius: 3px; background: rgb(var(--color-border-rgb,0 0 0)/.3);
+    transition: width .25s, background .25s; width: 6px;
+  }
+  .pz-ft__dot.active { width: 20px; background: rgb(var(--color-foreground-rgb,0 0 0)); }
+  .pz-ft__label { font-size: 11px; opacity: .5; }
+  .pz-ft__next {
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap; min-width: 100px; justify-content: flex-end;
+  }
+  .pz-ft__next .button { display: flex; align-items: center; gap: 6px; }
+  .pz-error { font-size: var(--font-size--sm); color: #c0392b; padding: 0 20px 10px; text-align: center; }
+  .pz-error[hidden] { display: none; }
 
   /* Mobile */
-  @media screen and (max-width: 749px) {
+  @media (max-width: 749px) {
     .pz-modal { padding: 0; align-items: flex-end; }
-    .pz-modal__dialog { width: 100%; height: 95dvh; border-radius: 20px 20px 0 0; }
+    .pz-dialog { width: 100%; height: 95dvh; border-radius: 20px 20px 0 0; }
     .pz-s2, .pz-s3 { flex-direction: column; }
-    .pz-crop-stage, .pz-frame-stage { height: 52%; width: 100% !important; aspect-ratio: unset; flex-shrink: 0; }
-    .pz-crop-controls, .pz-frame-controls { flex: 1; overflow-y: auto; padding: 16px; }
-    .pz-size-grid { grid-template-columns: repeat(4, 1fr); }
+    .pz-crop-area, .pz-frame-stage { width: 100% !important; height: 50%; flex-shrink: 0; }
+    .pz-crop-ctrl, .pz-frame-ctrl { flex: 1; overflow-y: auto; padding: 14px 16px; }
+    .pz-size-grid { grid-template-columns: repeat(4,1fr); }
   }
 </style>
 
-<div id="pz-modal" class="pz-modal" hidden role="dialog" aria-modal="true">
-  <div class="pz-modal__backdrop" id="pz-backdrop"></div>
-  <div class="pz-modal__dialog">
+<div id="pz-modal" class="pz-modal" hidden role="dialog" aria-modal="true" aria-label="Quadro Personalizado">
+  <div class="pz-backdrop" id="pz-backdrop"></div>
+  <div class="pz-dialog">
 
     <!-- Header -->
-    <div class="pz-mh">
-      <button class="pz-mh__back" id="pz-back" hidden type="button">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Voltar
-      </button>
-      <div class="pz-mh__steps">
-        <div class="pz-mh__dot active" id="pz-dot-1"></div>
-        <div class="pz-mh__dot" id="pz-dot-2"></div>
-        <div class="pz-mh__dot" id="pz-dot-3"></div>
-      </div>
-      <button class="pz-mh__close" id="pz-close" type="button" aria-label="Fechar">
+    <div class="pz-hd">
+      <p class="pz-hd__title">Personalizados</p>
+      <button class="pz-hd__close" id="pz-close" type="button" aria-label="Fechar">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 3L3 13M13 13L3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -228,53 +234,58 @@
           <input type="file" id="pz-file" accept="image/*" hidden>
           <svg width="56" height="56" viewBox="0 0 64 64" fill="none"><rect x="8" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="28" r="4" stroke="currentColor" stroke-width="2"/><path d="M8 42l12-10 8 8 8-6 20 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 8v16M26 12l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <p class="pz-dropzone__title">Envie sua imagem</p>
-          <p class="pz-dropzone__hint">Arraste aqui ou clique para selecionar · qualidade original preservada</p>
+          <p class="pz-dropzone__sub">Arraste aqui ou clique para selecionar · qualidade original preservada</p>
           <button class="button" id="pz-select-btn" type="button">Selecionar arquivo</button>
         </div>
       {% endunless %}
     </div>
 
-    <!-- Step 2: Crop -->
+    <!-- Step 2: Crop tool -->
     <div class="pz-step pz-s2" id="pz-s2" hidden>
-      <div class="pz-crop-stage" id="pz-crop-stage">
-        <img id="pz-crop-img" src="" alt="">
-        <span class="pz-crop-overlay-hint">Arraste para reposicionar</span>
+      <div class="pz-crop-area" id="pz-crop-area">
+        <img id="pz-crop-img" src="" alt="" draggable="false">
+        <div id="pz-crop-box">
+          <div class="pz-ch pz-ch--nw"></div>
+          <div class="pz-ch pz-ch--ne"></div>
+          <div class="pz-ch pz-ch--sw"></div>
+          <div class="pz-ch pz-ch--se"></div>
+        </div>
       </div>
-      <div class="pz-crop-controls">
+      <div class="pz-crop-ctrl">
         <div>
           <h3>Escolha o tamanho</h3>
           <p>O recorte se ajusta à proporção do quadro selecionado</p>
         </div>
         <div class="pz-size-grid" id="pz-size-grid">
           <button class="pz-size-card" data-size="20x30cm" data-w="20" data-h="30" type="button">
-            <div class="pz-size-card__box" style="width:32px;height:48px"></div>
-            <span class="pz-size-card__name">20×30cm</span>
+            <div class="pz-size-card__box" style="width:28px;height:42px"></div>
+            <span class="pz-size-card__name">20×30 cm</span>
           </button>
           <button class="pz-size-card" data-size="30x40cm" data-w="30" data-h="40" type="button">
-            <div class="pz-size-card__box" style="width:36px;height:48px"></div>
-            <span class="pz-size-card__name">30×40cm</span>
+            <div class="pz-size-card__box" style="width:33px;height:44px"></div>
+            <span class="pz-size-card__name">30×40 cm</span>
           </button>
           <button class="pz-size-card" data-size="40x60cm" data-w="40" data-h="60" type="button">
-            <div class="pz-size-card__box" style="width:32px;height:48px"></div>
-            <span class="pz-size-card__name">40×60cm</span>
+            <div class="pz-size-card__box" style="width:28px;height:42px"></div>
+            <span class="pz-size-card__name">40×60 cm</span>
           </button>
           <button class="pz-size-card" data-size="60x90cm" data-w="60" data-h="90" type="button">
-            <div class="pz-size-card__box" style="width:32px;height:48px"></div>
-            <span class="pz-size-card__name">60×90cm</span>
+            <div class="pz-size-card__box" style="width:28px;height:42px"></div>
+            <span class="pz-size-card__name">60×90 cm</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Step 3: Frame -->
+    <!-- Step 3: Frame preview -->
     <div class="pz-step pz-s3" id="pz-s3" hidden>
       <div class="pz-frame-stage" id="pz-frame-stage">
         <div class="pz-frame-inner">
-          <img class="artwork" id="pz-artwork" src="" alt="">
+          <img class="pz-artwork" id="pz-artwork" src="" alt="">
         </div>
-        <img class="pz-moldura" id="pz-moldura" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="">
+        <img class="pz-moldura-img" id="pz-moldura" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="">
       </div>
-      <div class="pz-frame-controls">
+      <div class="pz-frame-ctrl">
         <div>
           <p class="pz-opt-label">Moldura: <strong id="pz-frame-label">Branca</strong></p>
           <div class="pz-swatches">
@@ -284,17 +295,33 @@
           </div>
         </div>
         <div class="pz-sil-wrap">
-          <img src="{{ 'tamanho.jpg' | asset_url }}" alt="Comparação de tamanhos">
+          <img id="pz-tamanho" src="{{ 'tamanho.jpg' | asset_url }}" alt="Comparação de tamanhos">
         </div>
-        <p class="pz-mf__error" id="pz-error" hidden></p>
         <button class="button pz-buy-btn" id="pz-buy" type="button" disabled>Comprar</button>
       </div>
     </div>
 
     <!-- Footer -->
-    <div class="pz-mf">
-      <span class="pz-mf__hint" id="pz-hint">Etapa 1 de 3</span>
-      <button class="button" id="pz-next" type="button" disabled>Próximo</button>
+    <p class="pz-error" id="pz-error" hidden></p>
+    <div class="pz-ft">
+      <button class="pz-ft__back" id="pz-back" hidden type="button">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Voltar
+      </button>
+      <div class="pz-ft__center">
+        <div class="pz-ft__dots">
+          <div class="pz-ft__dot active" id="pz-dot-1"></div>
+          <div class="pz-ft__dot" id="pz-dot-2"></div>
+          <div class="pz-ft__dot" id="pz-dot-3"></div>
+        </div>
+        <span class="pz-ft__label" id="pz-step-label">Etapa 1 de 3</span>
+      </div>
+      <div class="pz-ft__next">
+        <button class="button" id="pz-next" type="button" disabled>
+          Próximo
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
     </div>
 
   </div>
@@ -302,9 +329,10 @@
 
 <script>
 (function () {
+  'use strict';
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 
-  const modal   = document.getElementById('pz-modal');
+  const modal = document.getElementById('pz-modal');
   if (!modal) return;
 
   const frameUrls = {
@@ -313,48 +341,56 @@
     oak:   {{ 'moldura_oak_fixed.png'   | asset_url | json }},
   };
 
-  // State
+  /* ── State ── */
   let step = 1;
   let objectUrl = null;
   let uploadPromise = null;
-  let cropX = 50, cropY = 50;
-  let selectedSize = null, selectedW = 2, selectedH = 3;
+  let selectedSize = null, selW = 2, selH = 3;
   let selectedFrame = 'white';
+  /* crop box (pixels in crop area) */
+  let bL = 0, bT = 0, bW = 0, bH = 0;
+  /* image position/size */
+  let iX = 0, iY = 0, iW = 0, iH = 0, iSc = 1;
+  /* drag */
+  let dragging = false, dragSX = 0, dragSY = 0, dragIX = 0, dragIY = 0;
 
-  // Elements
-  const s1 = document.getElementById('pz-s1');
-  const s2 = document.getElementById('pz-s2');
-  const s3 = document.getElementById('pz-s3');
-  const cropStage  = document.getElementById('pz-crop-stage');
+  /* ── Elements ── */
+  const s1         = document.getElementById('pz-s1');
+  const s2         = document.getElementById('pz-s2');
+  const s3         = document.getElementById('pz-s3');
+  const cropArea   = document.getElementById('pz-crop-area');
   const cropImg    = document.getElementById('pz-crop-img');
+  const cropBox    = document.getElementById('pz-crop-box');
   const artworkImg = document.getElementById('pz-artwork');
   const molduraImg = document.getElementById('pz-moldura');
   const frameStage = document.getElementById('pz-frame-stage');
   const nextBtn    = document.getElementById('pz-next');
   const backBtn    = document.getElementById('pz-back');
-  const hintEl     = document.getElementById('pz-hint');
+  const stepLabel  = document.getElementById('pz-step-label');
   const buyBtn     = document.getElementById('pz-buy');
   const errorEl    = document.getElementById('pz-error');
 
-  // ── Modal open / close ──
+  /* ── Open / Close ── */
   function openModal() {
     modal.removeAttribute('hidden');
-    document.body.classList.add('pz-modal-open');
+    document.body.classList.add('pz-open');
   }
   function closeModal() {
     modal.setAttribute('hidden', '');
-    document.body.classList.remove('pz-modal-open');
+    document.body.classList.remove('pz-open');
     resetModal();
   }
   function resetModal() {
-    goToStep(1);
     if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
     uploadPromise = null;
-    cropX = 50; cropY = 50;
-    selectedSize = null;
+    selectedSize = null; selW = 2; selH = 3;
     const fi = document.getElementById('pz-file');
     if (fi) fi.value = '';
     document.querySelectorAll('.pz-size-card').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.pz-swatch').forEach((b, i) => b.classList.toggle('active', i === 0));
+    molduraImg.src = frameUrls.white;
+    selectedFrame = 'white';
+    goToStep(1);
   }
 
   document.getElementById('pz-close')?.addEventListener('click', closeModal);
@@ -368,42 +404,52 @@
   });
   if (window.location.pathname.includes('/pages/personalizados')) openModal();
 
-  // ── Step navigation ──
+  /* ── Navigation ── */
   function goToStep(n) {
     step = n;
     s1.hidden = n !== 1;
     s2.hidden = n !== 2;
     s3.hidden = n !== 3;
     backBtn.hidden = n === 1;
-    document.querySelectorAll('.pz-mh__dot').forEach((d, i) => d.classList.toggle('active', i + 1 === n));
+    [1, 2, 3].forEach(i => {
+      document.getElementById('pz-dot-' + i).classList.toggle('active', i === n);
+    });
+    stepLabel.textContent = 'Etapa ' + n + ' de 3';
 
     if (n === 1) {
       nextBtn.textContent = 'Próximo';
+      nextBtn.innerHTML = 'Próximo <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       nextBtn.disabled = !objectUrl;
-      hintEl.textContent = 'Etapa 1 de 3';
       nextBtn.style.display = '';
+      buyBtn.style.display = 'none';
     } else if (n === 2) {
-      nextBtn.textContent = 'Próximo';
+      nextBtn.innerHTML = 'Próximo <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       nextBtn.disabled = !selectedSize;
-      hintEl.textContent = selectedSize ? '' : 'Selecione um tamanho para continuar';
       nextBtn.style.display = '';
+      buyBtn.style.display = 'none';
+      if (objectUrl && cropImg.complete && cropImg.naturalWidth) initCrop();
     } else if (n === 3) {
       nextBtn.style.display = 'none';
-      hintEl.textContent = '';
+      buyBtn.style.display = '';
+      buyBtn.disabled = false;
       syncArtwork();
     }
+    if (errorEl) errorEl.hidden = true;
   }
 
   backBtn.addEventListener('click', () => goToStep(step - 1));
-  nextBtn.addEventListener('click', () => goToStep(step + 1));
+  nextBtn.addEventListener('click', () => {
+    if (step === 2 && !selectedSize) return;
+    goToStep(step + 1);
+  });
 
-  // ── Upload ──
-  const fileInput  = document.getElementById('pz-file');
-  const selectBtn  = document.getElementById('pz-select-btn');
-  const dropZone   = document.getElementById('pz-drop');
+  /* ── Upload ── */
+  const fileInput = document.getElementById('pz-file');
+  const selectBtn = document.getElementById('pz-select-btn');
+  const dropZone  = document.getElementById('pz-drop');
 
-  selectBtn?.addEventListener('click', () => fileInput?.click());
-  dropZone?.addEventListener('click', e => { if (e.target !== selectBtn) fileInput?.click(); });
+  selectBtn?.addEventListener('click', e => { e.stopPropagation(); fileInput?.click(); });
+  dropZone?.addEventListener('click', () => fileInput?.click());
   fileInput?.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
   dropZone?.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone?.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
@@ -416,11 +462,14 @@
   function handleFile(file) {
     if (objectUrl) URL.revokeObjectURL(objectUrl);
     objectUrl = URL.createObjectURL(file);
-    cropX = 50; cropY = 50;
     cropImg.src = objectUrl;
-    cropImg.style.objectPosition = '50% 50%';
     uploadPromise = uploadToCloudinary(file);
-    nextBtn.disabled = false;
+    /* auto-advance once image metadata is loaded */
+    cropImg.onload = () => {
+      cropImg.onload = null;
+      goToStep(2);
+      initCrop();
+    };
   }
 
   async function uploadToCloudinary(file) {
@@ -428,85 +477,126 @@
     fd.append('file', file);
     fd.append('upload_preset', 'ipaperclub');
     const res = await fetch('https://api.cloudinary.com/v1_1/dp9wibnvk/image/upload', { method: 'POST', body: fd });
-    if (!res.ok) throw new Error('upload failed');
+    if (!res.ok) throw new Error('upload ' + res.status);
     return (await res.json()).secure_url;
   }
 
-  // ── Crop drag (on crop stage) ──
-  let dragging = false, dragStartX, dragStartY, dragCropX, dragCropY;
-
-  function getOverflow() {
-    const cW = cropStage.offsetWidth, cH = cropStage.offsetHeight;
-    const nW = cropImg.naturalWidth || 1, nH = cropImg.naturalHeight || 1;
-    const scale = Math.max(cW / nW, cH / nH);
-    return { x: Math.max(0, nW * scale - cW), y: Math.max(0, nH * scale - cH) };
+  /* ── Crop engine ── */
+  function initCrop() {
+    const aW = cropArea.offsetWidth, aH = cropArea.offsetHeight;
+    if (!aW || !aH) return;
+    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
+    if (!nW || !nH) return;
+    const fR = selW / selH;
+    const pad = 0.84;
+    if (aW / aH > fR) { bH = aH * pad; bW = bH * fR; }
+    else              { bW = aW * pad; bH = bW / fR; }
+    bL = (aW - bW) / 2; bT = (aH - bH) / 2;
+    iSc = Math.max(bW / nW, bH / nH);
+    iW = nW * iSc; iH = nH * iSc;
+    iX = bL + (bW - iW) / 2;
+    iY = bT + (bH - iH) / 2;
+    constrainImg();
+    applyDom();
   }
 
-  cropStage.addEventListener('mousedown', e => {
+  function constrainImg() {
+    iX = clamp(iX, bL + bW - iW, bL);
+    iY = clamp(iY, bT + bH - iH, bT);
+  }
+
+  function applyDom() {
+    cropImg.style.width  = iW + 'px';
+    cropImg.style.height = iH + 'px';
+    cropImg.style.transform = 'translate(' + iX + 'px,' + iY + 'px)';
+    cropBox.style.left   = bL + 'px';
+    cropBox.style.top    = bT + 'px';
+    cropBox.style.width  = bW + 'px';
+    cropBox.style.height = bH + 'px';
+  }
+
+  function getCropParams() {
+    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
+    if (!nW) return null;
+    return {
+      x: Math.round((bL - iX) / iSc),
+      y: Math.round((bT - iY) / iSc),
+      w: Math.round(bW / iSc),
+      h: Math.round(bH / iSc),
+    };
+  }
+
+  /* drag on crop area */
+  cropArea.addEventListener('mousedown', e => {
     e.preventDefault();
-    dragging = true; dragStartX = e.clientX; dragStartY = e.clientY;
-    dragCropX = cropX; dragCropY = cropY;
-    cropStage.classList.add('dragging');
+    dragging = true; dragSX = e.clientX; dragSY = e.clientY;
+    dragIX = iX; dragIY = iY;
+    cropArea.classList.add('dragging');
   });
   window.addEventListener('mousemove', e => {
     if (!dragging) return;
-    const { x: ovX, y: ovY } = getOverflow();
-    cropX = ovX > 0 ? clamp(dragCropX - (e.clientX - dragStartX) / ovX * 100, 0, 100) : 50;
-    cropY = ovY > 0 ? clamp(dragCropY - (e.clientY - dragStartY) / ovY * 100, 0, 100) : 50;
-    cropImg.style.objectPosition = `${cropX}% ${cropY}%`;
+    iX = dragIX + (e.clientX - dragSX);
+    iY = dragIY + (e.clientY - dragSY);
+    constrainImg(); applyDom();
   });
-  window.addEventListener('mouseup', () => { dragging = false; cropStage.classList.remove('dragging'); });
-  cropStage.addEventListener('touchstart', e => {
+  window.addEventListener('mouseup', () => { dragging = false; cropArea.classList.remove('dragging'); });
+  cropArea.addEventListener('touchstart', e => {
     e.preventDefault();
     const t = e.touches[0];
-    dragging = true; dragStartX = t.clientX; dragStartY = t.clientY;
-    dragCropX = cropX; dragCropY = cropY;
+    dragging = true; dragSX = t.clientX; dragSY = t.clientY;
+    dragIX = iX; dragIY = iY;
   }, { passive: false });
-  cropStage.addEventListener('touchmove', e => {
+  cropArea.addEventListener('touchmove', e => {
     e.preventDefault();
     if (!dragging) return;
     const t = e.touches[0];
-    const { x: ovX, y: ovY } = getOverflow();
-    cropX = ovX > 0 ? clamp(dragCropX - (t.clientX - dragStartX) / ovX * 100, 0, 100) : 50;
-    cropY = ovY > 0 ? clamp(dragCropY - (t.clientY - dragStartY) / ovY * 100, 0, 100) : 50;
-    cropImg.style.objectPosition = `${cropX}% ${cropY}%`;
+    iX = dragIX + (t.clientX - dragSX);
+    iY = dragIY + (t.clientY - dragSY);
+    constrainImg(); applyDom();
   }, { passive: false });
-  cropStage.addEventListener('touchend', () => { dragging = false; });
+  cropArea.addEventListener('touchend', () => { dragging = false; });
 
-  // ── Size selection ──
+  /* ── Size selection ── */
   document.getElementById('pz-size-grid')?.querySelectorAll('.pz-size-card').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedSize = btn.dataset.size;
-      selectedW = +btn.dataset.w;
-      selectedH = +btn.dataset.h;
-      const ratio = `${selectedW}/${selectedH}`;
-      cropStage.style.setProperty('--pz-ratio', ratio);
-      frameStage.style.setProperty('--pz-ratio', ratio);
-      cropX = 50; cropY = 50;
-      cropImg.style.objectPosition = '50% 50%';
+      selW = +btn.dataset.w;
+      selH = +btn.dataset.h;
       document.querySelectorAll('.pz-size-card').forEach(b => b.classList.toggle('active', b === btn));
       nextBtn.disabled = false;
-      hintEl.textContent = '';
+      initCrop();
     });
   });
 
-  // ── Frame (step 3) ──
+  /* ── Frame (step 3) ── */
   function syncArtwork() {
-    artworkImg.src = objectUrl || '';
-    artworkImg.style.objectPosition = `${cropX}% ${cropY}%`;
+    if (!objectUrl) return;
+    const cp = getCropParams();
+    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
+    /* translate crop box position to object-position percentages for preview */
+    const iW2 = nW, iH2 = nH;
+    const fW = artworkImg.offsetWidth  || 1;
+    const fH = artworkImg.offsetHeight || 1;
+    const coverSc = Math.max(fW / nW, fH / nH);
+    const ovX = Math.max(0, nW * coverSc - fW);
+    const ovY = Math.max(0, nH * coverSc - fH);
+    const posX = cp && ovX > 0 ? clamp(cp.x * coverSc / ovX * 100, 0, 100) : 50;
+    const posY = cp && ovY > 0 ? clamp(cp.y * coverSc / ovY * 100, 0, 100) : 50;
+    artworkImg.src = objectUrl;
+    artworkImg.style.objectPosition = posX + '% ' + posY + '%';
     buyBtn.disabled = false;
   }
 
   document.querySelectorAll('.pz-swatch').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedFrame = btn.dataset.frame;
-      molduraImg.src = frameUrls[selectedFrame];
+      molduraImg.src = frameUrls[selectedFrame] || '';
       document.getElementById('pz-frame-label').textContent = btn.dataset.label;
       document.querySelectorAll('.pz-swatch').forEach(s => s.classList.toggle('active', s === btn));
     });
   });
 
-  // ── Buy ──
+  /* ── Buy ── */
   buyBtn.addEventListener('click', addToCart);
 
   async function addToCart() {
@@ -515,14 +605,15 @@
     if (errorEl) errorEl.hidden = true;
 
     let imageUrl;
-    try { imageUrl = await uploadPromise; }
-    catch {
-      showError('Erro ao enviar a imagem. Tente novamente.');
+    try {
+      imageUrl = await uploadPromise;
+    } catch (err) {
+      showError('Erro ao enviar a imagem. Verifique sua conexão e tente novamente.');
       buyBtn.disabled = false; buyBtn.textContent = 'Comprar'; return;
     }
 
-    const crop = getCropParams();
-    const finalUrl = buildCroppedUrl(imageUrl, crop);
+    const cp = getCropParams();
+    const finalUrl = buildCroppedUrl(imageUrl, cp);
 
     buyBtn.textContent = 'Adicionando ao carrinho…';
     let product;
@@ -549,7 +640,13 @@
       const r = await fetch('/cart/add.js', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: [{ id: variant.id, quantity: 1, properties: { 'Imagem personalizada': finalUrl, 'Tamanho': selectedSize, 'Moldura': frameLabel } }] }),
+        body: JSON.stringify({
+          items: [{ id: variant.id, quantity: 1, properties: {
+            'Imagem personalizada': finalUrl,
+            'Tamanho': selectedSize,
+            'Moldura': frameLabel,
+          }}],
+        }),
       });
       if (!r.ok) throw new Error();
       window.location.href = '/cart';
@@ -559,24 +656,9 @@
     }
   }
 
-  function getCropParams() {
-    const cW = cropStage.offsetWidth, cH = cropStage.offsetHeight;
-    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
-    if (!nW) return null;
-    const scale = Math.max(cW / nW, cH / nH);
-    const ovX = Math.max(0, nW * scale - cW);
-    const ovY = Math.max(0, nH * scale - cH);
-    return {
-      x: Math.round(ovX * cropX / 100 / scale),
-      y: Math.round(ovY * cropY / 100 / scale),
-      w: Math.round(cW / scale),
-      h: Math.round(cH / scale),
-    };
-  }
-
-  function buildCroppedUrl(url, crop) {
-    if (!crop || (!crop.x && !crop.y)) return url;
-    return url.replace('/upload/', `/upload/c_crop,x_${crop.x},y_${crop.y},w_${crop.w},h_${crop.h}/`);
+  function buildCroppedUrl(url, cp) {
+    if (!cp || (!cp.x && !cp.y)) return url;
+    return url.replace('/upload/', '/upload/c_crop,x_' + cp.x + ',y_' + cp.y + ',w_' + cp.w + ',h_' + cp.h + '/');
   }
 
   function showError(msg) {
