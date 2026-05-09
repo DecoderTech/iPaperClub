@@ -492,10 +492,11 @@
     if (aW / aH > fR) { bH = aH * pad; bW = bH * fR; }
     else              { bW = aW * pad; bH = bW / fR; }
     bL = (aW - bW) / 2; bT = (aH - bH) / 2;
-    iSc = Math.max(bW / nW, bH / nH);
+    /* escala a imagem para cobrir TODA a área, não só o crop box → sem barras pretas */
+    iSc = Math.max(aW / nW, aH / nH);
     iW = nW * iSc; iH = nH * iSc;
-    iX = bL + (bW - iW) / 2;
-    iY = bT + (bH - iH) / 2;
+    iX = (aW - iW) / 2;
+    iY = (aH - iH) / 2;
     constrainImg();
     applyDom();
   }
@@ -572,18 +573,24 @@
   function syncArtwork() {
     if (!objectUrl) return;
     const cp = getCropParams();
-    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
-    /* translate crop box position to object-position percentages for preview */
-    const iW2 = nW, iH2 = nH;
-    const fW = artworkImg.offsetWidth  || 1;
-    const fH = artworkImg.offsetHeight || 1;
-    const coverSc = Math.max(fW / nW, fH / nH);
-    const ovX = Math.max(0, nW * coverSc - fW);
-    const ovY = Math.max(0, nH * coverSc - fH);
-    const posX = cp && ovX > 0 ? clamp(cp.x * coverSc / ovX * 100, 0, 100) : 50;
-    const posY = cp && ovY > 0 ? clamp(cp.y * coverSc / ovY * 100, 0, 100) : 50;
+    artworkImg.style.objectPosition = '50% 50%';
     artworkImg.src = objectUrl;
-    artworkImg.style.objectPosition = posX + '% ' + posY + '%';
+    /* aguarda a imagem carregar E o layout ser calculado */
+    artworkImg.onload = function () {
+      artworkImg.onload = null;
+      requestAnimationFrame(function () {
+        if (!cp) return;
+        const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
+        const fW = artworkImg.offsetWidth  || 1;
+        const fH = artworkImg.offsetHeight || 1;
+        const cs = Math.max(fW / nW, fH / nH);
+        const ovX = nW * cs - fW;
+        const ovY = nH * cs - fH;
+        const posX = ovX > 0 ? clamp(cp.x * cs / ovX * 100, 0, 100) : 50;
+        const posY = ovY > 0 ? clamp(cp.y * cs / ovY * 100, 0, 100) : 50;
+        artworkImg.style.objectPosition = posX + '% ' + posY + '%';
+      });
+    };
     buyBtn.disabled = false;
   }
 
