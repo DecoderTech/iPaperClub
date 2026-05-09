@@ -265,6 +265,10 @@
         </div>
       </div>
       <div class="pz-frame-ctrl">
+        <div class="pz-s3-size-info" id="pz-s3-size-info">
+          <p class="pz-opt-label" style="opacity:.45">Tamanho selecionado</p>
+          <p id="pz-s3-size-label" style="font-size:var(--font-size--lg);font-weight:600;margin:4px 0 0">—</p>
+        </div>
         <div>
           <p class="pz-opt-label">Moldura: <strong id="pz-frame-label">Branca</strong></p>
           <div class="pz-swatches">
@@ -273,8 +277,8 @@
             <button class="pz-swatch pz-swatch--oak" data-frame="oak" data-label="Madeira" title="Madeira" type="button"></button>
           </div>
         </div>
-        <div class="pz-sil-wrap">
-          <img src="{{ 'tamanho.jpg' | asset_url }}" alt="Comparação de tamanhos">
+        <div class="pz-sil-wrap" id="pz-sil-wrap">
+          <img src="{{ 'tamanho.jpg' | asset_url }}" alt="Comparação de tamanhos" onerror="document.getElementById('pz-sil-wrap').style.display='none'">
         </div>
         <button class="button pz-buy-btn" id="pz-buy" type="button" disabled>Comprar</button>
       </div>
@@ -569,8 +573,9 @@
     btn.addEventListener('click', () => {
       selectedSize=btn.dataset.size; selW=+btn.dataset.w; selH=+btn.dataset.h;
       document.querySelectorAll('.pz-size-card').forEach(b => b.classList.toggle('active', b===btn));
-      /* atualiza aspect-ratio do frame inner no step 3 */
       frameInner.style.setProperty('--pz-ratio', selW+'/'+selH);
+      const lbl = document.getElementById('pz-s3-size-label');
+      if (lbl) lbl.textContent = btn.querySelector('.pz-size-card__name').textContent;
       nextBtn.disabled=false;
       initFrameSel();
     });
