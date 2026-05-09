@@ -113,14 +113,13 @@
   }
   .pz-frame-inner {
     position: relative;
-    width: 68%;
-    aspect-ratio: var(--pz-ratio, 2/3);
     flex-shrink: 0;
+    /* width/height set by JS in syncArtwork() */
   }
-  .pz-frame-inner img.pz-artwork {
+  canvas.pz-artwork {
     position: absolute;
-    top: 8%; left: 13%; right: 13%; bottom: 8%;
-    object-fit: cover; display: block;
+    top: 0; left: 0;
+    display: block;
   }
   img.pz-moldura-img {
     position: absolute; inset: 0; width: 100%; height: 100%;
@@ -180,7 +179,7 @@
     .pz-img-stage, .pz-frame-stage { width: 100% !important; height: 52%; flex-shrink: 0; }
     .pz-crop-ctrl, .pz-frame-ctrl { flex: 1; overflow-y: auto; padding: 14px 16px; }
     .pz-size-grid { grid-template-columns: repeat(4,1fr); }
-    .pz-frame-inner { width: auto; height: 86%; }
+    /* pz-frame-inner sized by JS — no override needed */
   }
 </style>
 
@@ -261,7 +260,7 @@
     <div class="pz-step pz-s3" id="pz-s3" hidden>
       <div class="pz-frame-stage" id="pz-frame-stage">
         <div class="pz-frame-inner" id="pz-frame-inner">
-          <img class="pz-artwork" id="pz-artwork" src="" alt="">
+          <canvas class="pz-artwork" id="pz-artwork"></canvas>
           <img class="pz-moldura-img" id="pz-moldura" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="">
         </div>
       </div>
@@ -325,11 +324,38 @@
     oak:   {{ 'moldura_oak_fixed.png'   | asset_url | json }},
   };
 
+  /* mede onde está a área transparente da moldura PNG para posicionar o canvas exatamente */
+  (function() {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      try {
+        const mW = img.naturalWidth, mH = img.naturalHeight;
+        const c = document.createElement('canvas');
+        c.width = mW; c.height = mH;
+        const ctx2 = c.getContext('2d');
+        ctx2.drawImage(img, 0, 0);
+        const px = ctx2.getImageData(0, 0, mW, mH).data;
+        const alp = (x, y) => px[(y * mW + x) * 4 + 3];
+        const mx = mW >> 1, my = mH >> 1, T = 32;
+        let l = 0, t = 0, r = 0, b = 0;
+        for (let x = 1; x < mx; x++) if (alp(x, my) < T) { l = x; break; }
+        for (let x = mW-2; x > mx; x--) if (alp(x, my) < T) { r = mW-1-x; break; }
+        for (let y = 1; y < my; y++) if (alp(mx, y) < T) { t = y; break; }
+        for (let y = mH-2; y > my; y--) if (alp(mx, y) < T) { b = mH-1-y; break; }
+        if (l > 0 && r > 0 && t > 0 && b > 0)
+          moldInset = { l: l/mW, t: t/mH, r: r/mW, b: b/mH };
+      } catch(e) { /* CORS bloqueado — usa fallback */ }
+    };
+    /* cache-bust para forçar request com CORS headers */
+    img.src = frameUrls.white + (frameUrls.white.includes('?') ? '&' : '?') + '_cors=1';
+  })();
+
   /* ── Estado ── */
   let step = 1;
   let objectUrl = null;
   let uploadPromise = null;
-  let selW = 2, selH = 3, selectedSize = null, selectedFrame = 'white';
+  let selW = 20, selH = 30, selectedSize = '20x30cm', selectedFrame = 'white';
   /* frame selector: posição e tamanho em px dentro do img-stage */
   let fL = 0, fT = 0, fW = 0, fH = 0;
   /* drag frame */
@@ -337,6 +363,10 @@
   /* drag corner */
   let cornerDrag = null, cdSX = 0, cdSY = 0, cdFL = 0, cdFT = 0, cdFW = 0, cdFH = 0;
   const CH = 11; /* metade de 22px */
+  let cachedBounds = null; /* último bounds válido de getImgBounds */
+  let capturedCrop = null; /* crop em pixels naturais capturado na transição 2→3 */
+  /* inset da área transparente da moldura (frações do frameInner) */
+  let moldInset = { l: 0.035, t: 0.020, r: 0.020, b: 0.030 };
 
   /* ── Elementos ── */
   const s1         = document.getElementById('pz-s1');
@@ -366,7 +396,7 @@
   function closeModal() { modal.setAttribute('hidden',''); document.body.classList.remove('pz-open'); resetModal(); }
   function resetModal() {
     if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
-    uploadPromise = null; selectedSize = null; selW = 2; selH = 3;
+    uploadPromise = null; selectedSize = '20x30cm'; selW = 20; selH = 30;
     const fi = document.getElementById('pz-file');
     if (fi) fi.value = '';
     document.querySelectorAll('.pz-size-card').forEach(b => b.classList.remove('active'));
@@ -385,8 +415,25 @@
   });
   if (window.location.pathname.includes('/pages/personalizados')) openModal();
 
+  /* ── Captura o crop exato ANTES de esconder o step 2 ── */
+  function captureForStep3() {
+    const sw = imgStage.offsetWidth, sh = imgStage.offsetHeight;
+    if (!sw || !sh) return;
+    const nW = fullImg.naturalWidth || 1;
+    const nH = fullImg.naturalHeight || 1;
+    const sc = Math.min(sw / nW, sh / nH);
+    const offX = (sw - nW * sc) / 2;
+    const offY = (sh - nH * sc) / 2;
+    const x = Math.max(0, Math.round((fL - offX) / sc));
+    const y = Math.max(0, Math.round((fT - offY) / sc));
+    const w = Math.min(nW - x, Math.max(1, Math.round(fW / sc)));
+    const h = Math.min(nH - y, Math.max(1, Math.round(fH / sc)));
+    capturedCrop = { x, y, w, h };
+  }
+
   /* ── Navegação ── */
   function goToStep(n) {
+    if (n === 3 && step === 2) captureForStep3(); /* captura ANTES de esconder step 2 */
     step = n;
     s1.hidden = n!==1; s2.hidden = n!==2; s3.hidden = n!==3;
     backBtn.hidden = n===1;
@@ -397,12 +444,27 @@
       nextBtn.disabled = !objectUrl; nextBtn.style.display=''; buyBtn.style.display='none';
     } else if (n===2) {
       nextBtn.innerHTML = 'Próximo <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      nextBtn.disabled = !selectedSize; nextBtn.style.display=''; buyBtn.style.display='none';
+      nextBtn.disabled = false; nextBtn.style.display=''; buyBtn.style.display='none';
+      /* garante card e label default */
+      let activeCard = document.querySelector('.pz-size-card.active');
+      if (!activeCard) {
+        const first = document.querySelector('.pz-size-card[data-size="'+selectedSize+'"]')
+                   || document.querySelector('.pz-size-card');
+        if (first) { first.classList.add('active'); activeCard = first; }
+      }
+      /* sincroniza label do step 3 com o tamanho atual */
+      const lbl = document.getElementById('pz-s3-size-label');
+      if (lbl && activeCard) lbl.textContent = activeCard.querySelector('.pz-size-card__name').textContent;
       if (objectUrl && fullImg.complete && fullImg.naturalWidth) {
         requestAnimationFrame(initFrameSel);
       }
     } else {
       nextBtn.style.display='none'; buyBtn.style.display=''; buyBtn.disabled=false;
+      /* garante label no step 3 mesmo sem interação prévia */
+      const lbl3 = document.getElementById('pz-s3-size-label');
+      const ac = document.querySelector('.pz-size-card.active');
+      if (lbl3 && ac && lbl3.textContent === '—')
+        lbl3.textContent = ac.querySelector('.pz-size-card__name').textContent;
       syncArtwork();
     }
     if (errorEl) errorEl.hidden=true;
@@ -447,30 +509,38 @@
   /* ── Frame selector ── */
   function getImgBounds() {
     const sw = imgStage.offsetWidth, sh = imgStage.offsetHeight;
+    if (!sw || !sh) return cachedBounds || { offX:0, offY:0, iw:1, ih:1, sc:1 };
     const nW = fullImg.naturalWidth  || 1;
     const nH = fullImg.naturalHeight || 1;
     const sc = Math.min(sw/nW, sh/nH);
     const iw = nW*sc, ih = nH*sc;
-    return { offX:(sw-iw)/2, offY:(sh-ih)/2, iw, ih, sc };
+    cachedBounds = { offX:(sw-iw)/2, offY:(sh-ih)/2, iw, ih, sc };
+    return cachedBounds;
   }
 
   function initFrameSel() {
     const b = getImgBounds();
-    if (!b.iw) return;
+    if (!b.iw || !b.ih) return;
     const fR = selW/selH;
-    const pad = 0.82;
-    if (b.iw/b.ih > fR) { fH=b.ih*pad; fW=fH*fR; }
-    else                { fW=b.iw*pad; fH=fW/fR; }
-    fL = b.offX + (b.iw-fW)/2;
-    fT = b.offY + (b.ih-fH)/2;
+    /* maximiza o frame para cobrir o máximo da imagem com o aspect ratio correto */
+    if (b.iw/b.ih > fR) { fH = b.ih; fW = fH * fR; }
+    else                { fW = b.iw; fH = fW / fR; }
+    fW = Math.min(fW, b.iw);
+    fH = Math.min(fH, b.ih);
+    fL = b.offX + (b.iw - fW) / 2;
+    fT = b.offY + (b.ih - fH) / 2;
     constrainFrame();
     applyFrameDom();
   }
 
   function constrainFrame() {
     const b = getImgBounds();
-    fL = clamp(fL, b.offX, b.offX+b.iw-fW);
-    fT = clamp(fT, b.offY, b.offY+b.ih-fH);
+    const fR = selW/selH;
+    /* garante que fW/fH cabem dentro da imagem antes de posicionar */
+    if (fW > b.iw) { fW = b.iw; fH = fW / fR; }
+    if (fH > b.ih) { fH = b.ih; fW = fH * fR; }
+    fL = clamp(fL, b.offX, b.offX + b.iw - fW);
+    fT = clamp(fT, b.offY, b.offY + b.ih - fH);
   }
 
   function applyFrameDom() {
@@ -484,12 +554,13 @@
 
   function getCropParams() {
     const b = getImgBounds();
-    return {
-      x: Math.max(0, Math.round((fL-b.offX)/b.sc)),
-      y: Math.max(0, Math.round((fT-b.offY)/b.sc)),
-      w: Math.round(fW/b.sc),
-      h: Math.round(fH/b.sc),
-    };
+    const nW = fullImg.naturalWidth || 1;
+    const nH = fullImg.naturalHeight || 1;
+    const x = Math.max(0, Math.round((fL - b.offX) / b.sc));
+    const y = Math.max(0, Math.round((fT - b.offY) / b.sc));
+    const w = Math.min(nW - x, Math.max(1, Math.round(fW / b.sc)));
+    const h = Math.min(nH - y, Math.max(1, Math.round(fH / b.sc)));
+    return { x, y, w, h };
   }
 
   /* drag — mover frame selector */
@@ -522,11 +593,12 @@
     /* para cantos de cima: ajusta topo */
     if (cornerDrag==='ne'||cornerDrag==='nw') nFT = cdFT+cdFH-nFH;
 
-    /* constrain dentro da imagem */
-    nFL = clamp(nFL, b.offX, b.offX+b.iw-nFW);
-    nFT = clamp(nFT, b.offY, b.offY+b.ih-nFH);
-    nFW = Math.min(nFW, b.offX+b.iw-nFL);
+    /* constrain dentro da imagem — ajusta ambas as dimensões */
+    nFW = Math.min(nFW, b.iw);
     nFH = nFW/fR;
+    if (nFH > b.ih) { nFH = b.ih; nFW = nFH * fR; }
+    nFL = clamp(nFL, b.offX, b.offX + b.iw - nFW);
+    nFT = clamp(nFT, b.offY, b.offY + b.ih - nFH);
 
     fL=nFL; fT=nFT; fW=nFW; fH=nFH;
     applyFrameDom();
@@ -574,34 +646,61 @@
     btn.addEventListener('click', () => {
       selectedSize=btn.dataset.size; selW=+btn.dataset.w; selH=+btn.dataset.h;
       document.querySelectorAll('.pz-size-card').forEach(b => b.classList.toggle('active', b===btn));
-      frameInner.style.setProperty('--pz-ratio', selW+'/'+selH);
       const lbl = document.getElementById('pz-s3-size-label');
       if (lbl) lbl.textContent = btn.querySelector('.pz-size-card__name').textContent;
-      nextBtn.disabled=false;
+      nextBtn.disabled = false;
       initFrameSel();
     });
   });
 
   /* ── Step 3 — Preview ── */
+  function sizeFrameInner() {
+    const stage = document.getElementById('pz-frame-stage');
+    const sw = stage.offsetWidth, sh = stage.offsetHeight;
+    const ins = moldInset;
+    /* compensa os insets assimétricos para que a área INTERNA tenha exatamente selW/selH */
+    const xFrac = 1 - ins.l - ins.r;
+    const yFrac = 1 - ins.t - ins.b;
+    const frameRatio = (selW / selH) * (yFrac / xFrac);
+    let w = sw * 0.80;
+    let h = w / frameRatio;
+    if (h > sh * 0.88) { h = sh * 0.88; w = h * frameRatio; }
+    const W = Math.round(w), H = Math.round(h);
+    frameInner.style.width  = W + 'px';
+    frameInner.style.height = H + 'px';
+    return { w: W, h: H };
+  }
+
   function syncArtwork() {
     if (!objectUrl) return;
-    const cp = getCropParams();
-    artworkImg.style.objectPosition='50% 50%';
-    artworkImg.src = objectUrl;
-    artworkImg.onload = function() {
-      artworkImg.onload=null;
-      requestAnimationFrame(function() {
-        if (!cp) return;
-        const nW=fullImg.naturalWidth, nH=fullImg.naturalHeight;
-        const fw=artworkImg.offsetWidth||1, fh=artworkImg.offsetHeight||1;
-        const cs=Math.max(fw/nW, fh/nH);
-        const ovX=nW*cs-fw, ovY=nH*cs-fh;
-        const posX = ovX>0 ? clamp(cp.x*cs/ovX*100, 0, 100) : 50;
-        const posY = ovY>0 ? clamp(cp.y*cs/ovY*100, 0, 100) : 50;
-        artworkImg.style.objectPosition = posX+'% '+posY+'%';
-      });
-    };
-    buyBtn.disabled=false;
+    buyBtn.disabled = false;
+    const cp = capturedCrop; /* sempre capturado ANTES de esconder step 2 */
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const { w, h } = sizeFrameInner();
+      if (!w || !h) return;
+      /* posiciona canvas exatamente dentro da área transparente da moldura */
+      const ins = moldInset;
+      const cL = Math.round(w * ins.l);
+      const cT = Math.round(h * ins.t);
+      const cW = Math.round(w * (1 - ins.l - ins.r));
+      const cH = Math.round(h * (1 - ins.t - ins.b));
+      const canvas = artworkImg;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.style.left   = cL + 'px';
+      canvas.style.top    = cT + 'px';
+      canvas.style.width  = cW + 'px';
+      canvas.style.height = cH + 'px';
+      canvas.width  = Math.round(cW * dpr);
+      canvas.height = Math.round(cH * dpr);
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      if (cp && cp.w > 0 && cp.h > 0) {
+        ctx.drawImage(fullImg, cp.x, cp.y, cp.w, cp.h, 0, 0, cW, cH);
+      } else {
+        ctx.drawImage(fullImg, 0, 0, fullImg.naturalWidth, fullImg.naturalHeight, 0, 0, cW, cH);
+      }
+    }));
   }
 
   document.querySelectorAll('.pz-swatch').forEach(btn => {
@@ -627,7 +726,7 @@
       buyBtn.disabled=false; buyBtn.textContent='Comprar'; return;
     }
 
-    const cp = getCropParams();
+    const cp = capturedCrop || getCropParams();
     const finalUrl = buildCroppedUrl(imageUrl, cp);
 
     buyBtn.textContent='Adicionando ao carrinho…';
@@ -668,7 +767,10 @@
   }
 
   function buildCroppedUrl(url, cp) {
-    if (!cp||(!cp.x&&!cp.y)) return url;
+    if (!cp || !cp.w || !cp.h) return url;
+    const nW = fullImg.naturalWidth, nH = fullImg.naturalHeight;
+    /* só pula o crop se cobre a imagem inteira */
+    if (cp.x === 0 && cp.y === 0 && cp.w >= nW && cp.h >= nH) return url;
     return url.replace('/upload/', '/upload/c_crop,x_'+cp.x+',y_'+cp.y+',w_'+cp.w+',h_'+cp.h+'/');
   }
 

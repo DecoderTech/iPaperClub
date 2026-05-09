@@ -109,7 +109,67 @@
                   role="cell"
                   headers="productImage"
                 >
-                  {% if item.image -%}
+                  {%- liquid
+                    assign pz_img_url = nil
+                    assign frame_name = nil
+                    assign item_tamanho = nil
+
+                    for property in item.properties
+                      if property.first == '_Imagem personalizada'
+                        assign pz_img_url = property.last
+                      endif
+                      if property.first == 'Moldura'
+                        assign frame_name = property.last
+                      endif
+                      if property.first == 'Tamanho'
+                        assign item_tamanho = property.last
+                      endif
+                    endfor
+
+                    if frame_name == nil
+                      for option in item.options_with_values
+                        if option.name == 'Moldura'
+                          assign frame_name = option.value
+                        endif
+                        if option.name == 'Tamanho'
+                          assign item_tamanho = option.value
+                        endif
+                      endfor
+                    endif
+                  -%}
+
+                  {%- if frame_name != nil -%}
+                    {%- liquid
+                      assign moldura_file = 'moldura_white_fixed.png'
+                      if frame_name contains 'Preta'
+                        assign moldura_file = 'moldura_black_fixed.png'
+                      elsif frame_name contains 'Madeira'
+                        assign moldura_file = 'moldura_oak_fixed.png'
+                      endif
+
+                      assign pz_ratio = 0.758
+                      if item_tamanho != blank
+                        assign pz_dims = item_tamanho | split: 'x'
+                        assign pz_w = pz_dims[0] | times: 1.0
+                        assign pz_h = pz_dims[1] | remove: 'cm' | times: 1.0
+                        if pz_h > 0
+                          assign pz_inner_ratio = pz_w | divided_by: pz_h
+                          assign pz_ratio = pz_inner_ratio | times: 0.875 | divided_by: 0.77
+                        endif
+                      endif
+
+                      assign artwork_src = pz_img_url
+                      if artwork_src == nil and item.image
+                        assign artwork_src = item.image | image_url: width: 300
+                      endif
+                    -%}
+                    {%- if artwork_src != nil -%}
+                      <a href="{{ item.url }}" class="cart-items__media-container" style="--ratio: {{ pz_ratio }};">
+                        <img src="{{ artwork_src }}" alt="{{ item.product.title | escape }}" class="cart-items__pz-artwork" loading="lazy">
+                        <img src="{{ moldura_file | asset_url }}" alt="" class="cart-items__pz-moldura" aria-hidden="true" loading="lazy">
+                      </a>
+                    {%- endif -%}
+                  {%- elsif item.image -%}
                     {% liquid
                       assign ratio = 1
                       assign border_opacity = settings.cart_thumbnail_border_opacity | divided_by: 100.0
@@ -751,5 +811,25 @@
   .cart-items__properties dt,
   .cart-items__properties dd {
     display: inline;
+  }
+
+  .cart-items__pz-artwork {
+    position: absolute;
+    left: 11%;
+    top: 6.5%;
+    width: 77%;    /* 100 - l(11) - r(12) */
+    height: 87.5%; /* 100 - t(6.5) - b(6) */
+    object-fit: fill;
+    display: block;
+  }
+
+  .cart-items__pz-moldura {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    z-index: 1;
   }
 {% endstylesheet %}

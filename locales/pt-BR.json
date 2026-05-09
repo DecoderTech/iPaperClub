@@ -134,7 +134,7 @@
     "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Tributos, descontos e <a href=\"{{ link }}\">frete</a> calculados no checkout.",
     "taxes_at_checkout_shipping_at_checkout_without_policy": "Tributos, descontos e frete calculados no checkout.",
     "checkout": "Finalizar a compra",
-    "cart_title": "Cart",
+    "cart_title": "Carrinho",
     "product_image": "Imagem do produto",
     "product_information": "Informações do produto",
     "product_total": "Total de produtos",

@@ -15,7 +15,7 @@
           "type": "_cart-title",
           "static": true,
           "settings": {
-            "title": "Cart",
+            "title": "Carrinho",
             "show_count": true,
             "type_preset": "h3",
             "alignment": "left",
@@ -31,7 +31,7 @@
           "static": true,
           "settings": {
             "gap": 24,
-            "image_ratio": "square",
+            "image_ratio": "adapt",
             "dividers": true,
             "vendor": false,
             "padding-block-start": 0,
