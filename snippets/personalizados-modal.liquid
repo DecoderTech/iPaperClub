@@ -197,18 +197,6 @@
 
     <!-- Step 1: Upload / Login -->
     <div class="pz-step pz-s1" id="pz-s1">
-      {% unless customer %}
-        <div class="pz-login-wrap">
-          <svg width="56" height="56" viewBox="0 0 48 48" fill="none"><rect x="8" y="6" width="24" height="30" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 36v4h24V14h-8" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="18" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 30c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <h2 class="h3">Quadro Personalizado</h2>
-          <p>Para criar seu quadro com sua imagem, faça login primeiro.</p>
-          <div class="pz-login-btns">
-            <script src="{{ 'account-login-actions.js' | asset_url }}" type="module" fetchpriority="low"></script>
-            <account-login-actions>{{ shop | login_button }}</account-login-actions>
-            <a href="{{ routes.account_login_url }}" class="button button-secondary">Entrar com email</a>
-          </div>
-        </div>
-      {% else %}
         <div class="pz-dropzone" id="pz-drop">
           <input type="file" id="pz-file" accept="image/*" hidden>
           <svg width="56" height="56" viewBox="0 0 64 64" fill="none"><rect x="8" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="28" r="4" stroke="currentColor" stroke-width="2"/><path d="M8 42l12-10 8 8 8-6 20 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 8v16M26 12l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -216,7 +204,6 @@
           <p class="pz-dropzone__sub">Arraste aqui ou clique para selecionar · qualidade original preservada</p>
           <button class="button" id="pz-select-btn" type="button">Selecionar arquivo</button>
         </div>
-      {% endunless %}
     </div>
 
     <!-- Step 2: Imagem inteira + seletor de enquadramento -->
