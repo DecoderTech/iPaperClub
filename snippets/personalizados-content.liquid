@@ -1,4 +1,5 @@
 <style>
+  #pz-upload[hidden], #pz-panel[hidden], .pz-error[hidden] { display: none !important; }
   .personalizados { min-height: 60vh; padding: var(--padding-2xl) var(--page-margin); }
   .pz-login { display: flex; justify-content: center; align-items: center; min-height: 50vh; }
   .pz-login__inner { display: flex; flex-direction: column; align-items: center; gap: var(--gap-md); max-width: 400px; text-align: center; }
@@ -21,8 +22,10 @@
   .pz-frame-wrap { width: 100%; max-width: 420px; }
   .pz-frame-wrap .frame-preview { position: relative; width: 100%; aspect-ratio: var(--pz-ratio, 2/3); height: auto; overflow: hidden; background-color: #fff; transition: aspect-ratio 0.3s ease; }
   .pz-frame-inner { box-sizing: border-box; width: 100%; height: 100%; padding: 6% 11%; display: flex; align-items: center; justify-content: center; }
-  .pz-preview-media { width: 100%; height: 100%; padding: 0 !important; aspect-ratio: auto !important; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-  .pz-preview-img { width: 100%; height: 100%; object-fit: contain; }
+  .pz-preview-media { width: 100%; height: 100%; padding: 0 !important; aspect-ratio: auto !important; overflow: hidden; }
+  .pz-preview-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; cursor: grab; user-select: none; touch-action: none; display: block; }
+  .pz-preview-img.dragging { cursor: grabbing; }
+  .pz-crop-hint { font-size: var(--font-size--xs, 11px); opacity: 0.45; text-align: center; margin: 0; }
   .pz-change-btn { align-self: center; }
   .pz-controls { display: flex; flex-direction: column; gap: var(--gap-lg); }
   .pz-option__label { font-size: var(--font-size--sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--gap-xs); }
@@ -104,13 +107,14 @@
           <div class="pz-frame-wrap">
             <div class="frame-preview frame-preview--white" id="pz-frame">
               <div class="frame-preview__inner pz-frame-inner">
-                <div class="product-media pz-preview-media">
+                <div class="product-media pz-preview-media" id="pz-media">
                   <img id="pz-img" src="" alt="Sua imagem" class="product-media__image pz-preview-img">
                 </div>
               </div>
               <img class="frame-preview__frame-image" id="pz-frame-img" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="" loading="lazy">
             </div>
           </div>
+          <p class="pz-crop-hint">Arraste a imagem para reposicionar</p>
           <button class="button button-secondary pz-change-btn" id="pz-change" type="button">Trocar imagem</button>
         </div>
 
@@ -182,10 +186,14 @@
 </personalizados-page>
 
 <script type="module">
+  const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
   class PersonalizadosPage extends HTMLElement {
     _selectedFrame = 'white';
     _selectedSize = null;
     _uploadPromise = null;
+    _cropX = 50;
+    _cropY = 50;
 
     connectedCallback() {
       this._frameImages = {
@@ -196,6 +204,7 @@
       this._bindUpload();
       this._bindSwatches();
       this._bindSizes();
+      this._bindCropDrag();
       this._bindCta();
     }
 
@@ -224,6 +233,11 @@
         this.querySelector('#pz-upload').hidden = false;
         this.querySelector('#pz-panel').hidden  = true;
         this._uploadPromise = null;
+        this._selectedSize = null;
+        const cta = this.querySelector('#pz-cta');
+        if (cta) { cta.disabled = true; cta.textContent = 'Selecione um tamanho'; }
+        this.querySelectorAll('.pz-size-btn').forEach(b => b.classList.remove('active'));
+        this.querySelectorAll('.pz-silhouette__frame').forEach(f => f.classList.remove('active'));
       });
     }
 
@@ -231,7 +245,12 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = this.querySelector('#pz-img');
-        if (img) img.src = e.target.result;
+        if (img) {
+          this._cropX = 50;
+          this._cropY = 50;
+          img.style.objectPosition = '50% 50%';
+          img.src = e.target.result;
+        }
         this.querySelector('#pz-upload').hidden = true;
         this.querySelector('#pz-panel').hidden  = false;
       };
@@ -247,6 +266,92 @@
       if (!res.ok) throw new Error('upload failed');
       const data = await res.json();
       return data.secure_url;
+    }
+
+    _bindCropDrag() {
+      const img = this.querySelector('#pz-img');
+      if (!img) return;
+
+      let startX, startY, startCropX, startCropY, dragging = false;
+
+      const getOverflow = () => {
+        const media = this.querySelector('#pz-media');
+        const cW = media.offsetWidth;
+        const cH = media.offsetHeight;
+        const nW = img.naturalWidth || 1;
+        const nH = img.naturalHeight || 1;
+        const scale = Math.max(cW / nW, cH / nH);
+        return {
+          x: Math.max(0, nW * scale - cW),
+          y: Math.max(0, nH * scale - cH),
+        };
+      };
+
+      const onStart = (x, y) => {
+        startX = x; startY = y;
+        startCropX = this._cropX;
+        startCropY = this._cropY;
+        dragging = true;
+        img.classList.add('dragging');
+      };
+
+      const onMove = (x, y) => {
+        if (!dragging) return;
+        const { x: ovX, y: ovY } = getOverflow();
+        const dx = x - startX;
+        const dy = y - startY;
+        this._cropX = ovX > 0 ? clamp(startCropX - (dx / ovX) * 100, 0, 100) : 50;
+        this._cropY = ovY > 0 ? clamp(startCropY - (dy / ovY) * 100, 0, 100) : 50;
+        img.style.objectPosition = `${this._cropX}% ${this._cropY}%`;
+      };
+
+      const onEnd = () => { dragging = false; img.classList.remove('dragging'); };
+
+      img.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(e.clientX, e.clientY); });
+      window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+      window.addEventListener('mouseup', onEnd);
+
+      img.addEventListener('touchstart', (e) => { e.preventDefault(); const t = e.touches[0]; onStart(t.clientX, t.clientY); }, { passive: false });
+      img.addEventListener('touchmove', (e) => { e.preventDefault(); const t = e.touches[0]; onMove(t.clientX, t.clientY); }, { passive: false });
+      img.addEventListener('touchend', onEnd);
+    }
+
+    _resetCrop() {
+      this._cropX = 50;
+      this._cropY = 50;
+      const img = this.querySelector('#pz-img');
+      if (img) img.style.objectPosition = '50% 50%';
+    }
+
+    _getCropParams() {
+      const img   = this.querySelector('#pz-img');
+      const media = this.querySelector('#pz-media');
+      if (!img?.naturalWidth || !media) return null;
+
+      const cW = media.offsetWidth;
+      const cH = media.offsetHeight;
+      const nW = img.naturalWidth;
+      const nH = img.naturalHeight;
+
+      const scale   = Math.max(cW / nW, cH / nH);
+      const ovX     = Math.max(0, nW * scale - cW);
+      const ovY     = Math.max(0, nH * scale - cH);
+
+      const offsetX = ovX * (this._cropX / 100);
+      const offsetY = ovY * (this._cropY / 100);
+
+      const srcX = Math.round(offsetX / scale);
+      const srcY = Math.round(offsetY / scale);
+      const srcW = Math.round(cW / scale);
+      const srcH = Math.round(cH / scale);
+
+      return { x: srcX, y: srcY, w: srcW, h: srcH };
+    }
+
+    _buildCroppedUrl(url, crop) {
+      if (!crop || (crop.x === 0 && crop.y === 0 && !crop.w)) return url;
+      const transform = `c_crop,x_${crop.x},y_${crop.y},w_${crop.w},h_${crop.h}`;
+      return url.replace('/upload/', `/upload/${transform}/`);
     }
 
     _bindSwatches() {
@@ -272,6 +377,7 @@
         btn.addEventListener('click', () => {
           this._selectedSize = btn.dataset.size;
           this.querySelector('.pz-frame-wrap')?.style.setProperty('--pz-ratio', `${btn.dataset.w}/${btn.dataset.h}`);
+          this._resetCrop();
           this.querySelectorAll('.pz-size-btn').forEach((s) => s.classList.toggle('active', s === btn));
           this.querySelectorAll('.pz-silhouette__frame').forEach((f) => f.classList.toggle('active', f.dataset.size === btn.dataset.size));
           const cta = this.querySelector('#pz-cta');
@@ -298,6 +404,9 @@
         this._showError('Erro ao enviar a imagem. Tente novamente.');
         cta.disabled = false; cta.textContent = 'Comprar'; return;
       }
+
+      const crop = this._getCropParams();
+      const finalUrl = this._buildCroppedUrl(imageUrl, crop);
 
       cta.textContent = 'Adicionando ao carrinho…';
       let product;
@@ -326,7 +435,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            items: [{ id: variant.id, quantity: 1, properties: { 'Imagem personalizada': imageUrl, 'Tamanho': this._selectedSize, 'Moldura': frameLabel } }]
+            items: [{ id: variant.id, quantity: 1, properties: { 'Imagem personalizada': finalUrl, 'Tamanho': this._selectedSize, 'Moldura': frameLabel } }]
           }),
         });
         if (!res.ok) throw new Error();
