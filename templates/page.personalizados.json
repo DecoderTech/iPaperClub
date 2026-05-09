@@ -13,10 +13,8 @@
       "type": "main-page",
       "blocks": {
         "personalizados_content": {
-          "type": "custom-liquid",
-          "settings": {
-            "custom_liquid": "{% render 'personalizados-content' %}"
-          }
+          "type": "personalizados-content",
+          "settings": {}
         }
       },
       "block_order": ["personalizados_content"],
