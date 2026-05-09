@@ -10,8 +10,21 @@
 {
   "sections": {
     "main": {
-      "type": "page-personalizados",
-      "settings": {}
+      "type": "main-page",
+      "blocks": {
+        "personalizados_content": {
+          "type": "custom-liquid",
+          "settings": {
+            "custom_liquid": "{% render 'personalizados-content' %}"
+          }
+        }
+      },
+      "block_order": ["personalizados_content"],
+      "settings": {
+        "gap": 0,
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
     }
   },
   "order": ["main"]

@@ -1,0 +1,351 @@
+<style>
+  .personalizados { min-height: 60vh; padding: var(--padding-2xl) var(--page-margin); }
+  .pz-login { display: flex; justify-content: center; align-items: center; min-height: 50vh; }
+  .pz-login__inner { display: flex; flex-direction: column; align-items: center; gap: var(--gap-md); max-width: 400px; text-align: center; }
+  .pz-login__icon { width: 56px; height: 56px; opacity: 0.4; }
+  .pz-login__title { margin: 0; }
+  .pz-login__text { opacity: 0.65; margin: 0; }
+  .pz-login__actions { display: flex; flex-direction: column; gap: var(--gap-sm); width: 100%; }
+  .pz-login__shop-btn { width: 100%; }
+  .pz-login__actions .button { width: 100%; justify-content: center; }
+  .pz-upload { display: flex; justify-content: center; padding: var(--padding-xl) 0; }
+  .pz-upload__inner { display: flex; flex-direction: column; align-items: center; gap: var(--gap-sm); border: 2px dashed rgb(var(--color-border-rgb)); border-radius: 12px; padding: var(--padding-2xl) var(--padding-xl); width: 100%; max-width: 480px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .pz-upload__inner.drag-over { border-color: rgb(var(--color-foreground-rgb)); background: rgb(var(--color-foreground-rgb) / 0.04); }
+  .pz-upload__icon { width: 56px; height: 56px; opacity: 0.45; }
+  .pz-upload__title { font-size: var(--font-size--lg); font-weight: 600; margin: 0; }
+  .pz-upload__hint { font-size: var(--font-size--sm); opacity: 0.55; margin: 0; }
+  .pz-upload__btn { margin-top: var(--gap-xs); }
+  .pz-layout { display: grid; gap: var(--gap-2xl); grid-template-columns: 1fr; }
+  @media screen and (min-width: 900px) { .pz-layout { grid-template-columns: 1fr 1fr; align-items: start; } }
+  .pz-preview-col { display: flex; flex-direction: column; align-items: center; gap: var(--gap-md); }
+  .pz-frame-wrap { width: 100%; max-width: 420px; }
+  .pz-frame-wrap .frame-preview { position: relative; width: 100%; aspect-ratio: var(--pz-ratio, 2/3); height: auto; overflow: hidden; background-color: #fff; transition: aspect-ratio 0.3s ease; }
+  .pz-frame-inner { box-sizing: border-box; width: 100%; height: 100%; padding: 6% 11%; display: flex; align-items: center; justify-content: center; }
+  .pz-preview-media { width: 100%; height: 100%; padding: 0 !important; aspect-ratio: auto !important; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .pz-preview-img { width: 100%; height: 100%; object-fit: contain; }
+  .pz-change-btn { align-self: center; }
+  .pz-controls { display: flex; flex-direction: column; gap: var(--gap-lg); }
+  .pz-option__label { font-size: var(--font-size--sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--gap-xs); }
+  .pz-swatches { display: flex; gap: var(--gap-sm); }
+  .pz-swatch { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: border-color 0.15s, transform 0.15s; outline: none; }
+  .pz-swatch:hover { transform: scale(1.1); }
+  .pz-swatch.active { border-color: rgb(var(--color-foreground-rgb)); }
+  .pz-swatch--white { background: #f5f5f0; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12); }
+  .pz-swatch--black { background: #1a1a1a; }
+  .pz-swatch--oak { background: linear-gradient(135deg, #c8a46e 0%, #a07840 50%, #c8a46e 100%); }
+  .pz-sizes { display: flex; flex-wrap: wrap; gap: var(--gap-xs); }
+  .pz-size-btn { padding: var(--padding-xs) var(--padding-md); border: 2px solid rgb(var(--color-border-rgb)); border-radius: 6px; background: transparent; color: inherit; font-size: var(--font-size--sm); cursor: pointer; transition: border-color 0.15s, background 0.15s, color 0.15s; font-family: inherit; }
+  .pz-size-btn:hover { border-color: rgb(var(--color-foreground-rgb) / 0.5); }
+  .pz-size-btn.active { border-color: rgb(var(--color-foreground-rgb)); background: rgb(var(--color-foreground-rgb)); color: rgb(var(--color-background-rgb, 255 255 255)); }
+  .pz-silhouette__stage { display: flex; align-items: flex-end; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+  .pz-silhouette__person { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; gap: 2px; }
+  .pz-silhouette__measure { font-size: 10px; opacity: 0.55; white-space: nowrap; }
+  .pz-silhouette__svg { width: 50px; height: 272px; color: rgb(var(--color-foreground-rgb)); flex-shrink: 0; }
+  .pz-silhouette__frames { display: flex; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+  .pz-silhouette__frame { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+  .pz-silhouette__frame-label { font-size: 10px; opacity: 0.5; white-space: nowrap; transition: opacity 0.2s; }
+  .pz-silhouette__frame-box { width: var(--fw); height: var(--fh); border: 2px solid rgb(var(--color-border-rgb)); border-radius: 3px; transition: border-color 0.2s, background 0.2s; }
+  .pz-silhouette__frame.active .pz-silhouette__frame-box { border-color: rgb(var(--color-foreground-rgb)); background: rgb(var(--color-foreground-rgb) / 0.06); }
+  .pz-silhouette__frame.active .pz-silhouette__frame-label { opacity: 1; font-weight: 700; }
+  .pz-cta { width: 100%; justify-content: center; }
+  .pz-cta:disabled { opacity: 0.45; cursor: not-allowed; }
+  .pz-error { color: #c0392b; font-size: var(--font-size--sm); margin: 0; padding: var(--padding-sm); background: rgb(192 57 43 / 0.08); border-radius: 6px; }
+</style>
+
+<personalizados-page
+  class="personalizados"
+  data-frame-white="{{ 'moldura_white_fixed.png' | asset_url }}"
+  data-frame-black="{{ 'moldura_black_fixed.png' | asset_url }}"
+  data-frame-oak="{{ 'moldura_oak_fixed.png' | asset_url }}"
+>
+  {% unless customer %}
+    <div class="pz-login">
+      <div class="pz-login__inner">
+        <svg class="pz-login__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="6" width="24" height="30" rx="2" stroke="currentColor" stroke-width="2"/>
+          <path d="M16 36v4h24V14h-8" stroke="currentColor" stroke-width="2"/>
+          <circle cx="20" cy="18" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 30c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h1 class="pz-login__title h3">Quadro Personalizado</h1>
+        <p class="pz-login__text">Para criar seu quadro com sua imagem, faça login primeiro.</p>
+        <div class="pz-login__actions">
+          <script src="{{ 'account-login-actions.js' | asset_url }}" type="module" fetchpriority="low"></script>
+          <account-login-actions class="pz-login__shop-btn">
+            {{ shop | login_button }}
+          </account-login-actions>
+          <a href="{{ routes.account_login_url }}" class="button button-secondary">
+            Entrar com email
+          </a>
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+
+    <div class="pz-upload" id="pz-upload">
+      <div class="pz-upload__inner" id="pz-drop">
+        <input type="file" id="pz-file" accept="image/*" hidden>
+        <svg class="pz-upload__icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2"/>
+          <circle cx="22" cy="28" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 42l12-10 8 8 8-6 20 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M32 8v16M26 12l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="pz-upload__title">Envie sua imagem</p>
+        <p class="pz-upload__hint">Arraste aqui ou clique para selecionar · qualidade original preservada</p>
+        <button class="button pz-upload__btn" id="pz-select-btn" type="button">Selecionar arquivo</button>
+      </div>
+    </div>
+
+    <div class="pz-panel" id="pz-panel" hidden>
+      <div class="pz-layout">
+        <div class="pz-preview-col">
+          <div class="pz-frame-wrap">
+            <div class="frame-preview frame-preview--white" id="pz-frame">
+              <div class="frame-preview__inner pz-frame-inner">
+                <div class="product-media pz-preview-media">
+                  <img id="pz-img" src="" alt="Sua imagem" class="product-media__image pz-preview-img">
+                </div>
+              </div>
+              <img class="frame-preview__frame-image" id="pz-frame-img" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="" loading="lazy">
+            </div>
+          </div>
+          <button class="button button-secondary pz-change-btn" id="pz-change" type="button">Trocar imagem</button>
+        </div>
+
+        <div class="pz-controls">
+          <div class="pz-option">
+            <p class="pz-option__label">Moldura: <strong id="pz-frame-label">Branca</strong></p>
+            <div class="pz-swatches" role="group" aria-label="Cor da moldura">
+              <button class="pz-swatch pz-swatch--white active" data-frame="white" data-label="Branca" title="Branca" type="button" aria-pressed="true"></button>
+              <button class="pz-swatch pz-swatch--black" data-frame="black" data-label="Preta" title="Preta" type="button" aria-pressed="false"></button>
+              <button class="pz-swatch pz-swatch--oak" data-frame="oak" data-label="Madeira" title="Madeira" type="button" aria-pressed="false"></button>
+            </div>
+          </div>
+
+          <div class="pz-option">
+            <p class="pz-option__label">Tamanho</p>
+            <div class="pz-sizes" role="group" aria-label="Tamanho do quadro">
+              <button class="pz-size-btn" data-size="20x30cm" data-w="20" data-h="30" type="button">20×30cm</button>
+              <button class="pz-size-btn" data-size="30x40cm" data-w="30" data-h="40" type="button">30×40cm</button>
+              <button class="pz-size-btn" data-size="40x60cm" data-w="40" data-h="60" type="button">40×60cm</button>
+              <button class="pz-size-btn" data-size="60x90cm" data-w="60" data-h="90" type="button">60×90cm</button>
+            </div>
+          </div>
+
+          <div class="pz-silhouette">
+            <p class="pz-option__label">Estimativa de tamanho</p>
+            <div class="pz-silhouette__stage">
+              <div class="pz-silhouette__person">
+                <span class="pz-silhouette__measure">1,70m</span>
+                <svg viewBox="0 0 50 272" xmlns="http://www.w3.org/2000/svg" class="pz-silhouette__svg" aria-hidden="true">
+                  <g fill="currentColor" opacity="0.25">
+                    <ellipse cx="25" cy="14" rx="13" ry="14"/>
+                    <rect x="21" y="27" width="8" height="11" rx="3"/>
+                    <path d="M9,38 C6,55 5,82 7,106 C8,121 12,132 16,137 C19,140 22,142 25,142 C28,142 31,140 34,137 C38,132 42,121 43,106 C45,82 44,55 41,38 C37,35 30,33 25,33 C20,33 13,35 9,38Z"/>
+                    <path d="M8,38 C3,50 0,80 1,108 L8,106 C7,82 9,57 13,44Z"/>
+                    <path d="M42,38 C47,50 50,80 49,108 L42,106 C43,82 41,57 37,44Z"/>
+                    <path d="M16,140 C14,160 12,192 11,220 C10,242 11,256 12,268 L20,268 C19,254 19,238 20,216 C21,196 22,174 23,156"/>
+                    <path d="M34,140 C36,160 38,192 39,220 C40,242 39,256 38,268 L30,268 C31,254 31,238 30,216 C29,196 28,174 27,156"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="pz-silhouette__frames">
+                <div class="pz-silhouette__frame" data-size="20x30cm" style="--fw:32px;--fh:48px">
+                  <span class="pz-silhouette__frame-label">20×30</span>
+                  <div class="pz-silhouette__frame-box"></div>
+                </div>
+                <div class="pz-silhouette__frame" data-size="30x40cm" style="--fw:48px;--fh:64px">
+                  <span class="pz-silhouette__frame-label">30×40</span>
+                  <div class="pz-silhouette__frame-box"></div>
+                </div>
+                <div class="pz-silhouette__frame" data-size="40x60cm" style="--fw:64px;--fh:96px">
+                  <span class="pz-silhouette__frame-label">40×60</span>
+                  <div class="pz-silhouette__frame-box"></div>
+                </div>
+                <div class="pz-silhouette__frame" data-size="60x90cm" style="--fw:96px;--fh:144px">
+                  <span class="pz-silhouette__frame-label">60×90</span>
+                  <div class="pz-silhouette__frame-box"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="pz-error" id="pz-error" hidden></p>
+          <button class="button pz-cta" id="pz-cta" type="button" disabled>Selecione um tamanho</button>
+        </div>
+      </div>
+    </div>
+
+  {% endunless %}
+</personalizados-page>
+
+<script type="module">
+  class PersonalizadosPage extends HTMLElement {
+    _selectedFrame = 'white';
+    _selectedSize = null;
+    _uploadPromise = null;
+
+    connectedCallback() {
+      this._frameImages = {
+        white: this.dataset.frameWhite,
+        black: this.dataset.frameBlack,
+        oak:   this.dataset.frameOak,
+      };
+      this._bindUpload();
+      this._bindSwatches();
+      this._bindSizes();
+      this._bindCta();
+    }
+
+    _bindUpload() {
+      const input     = this.querySelector('#pz-file');
+      const selectBtn = this.querySelector('#pz-select-btn');
+      const drop      = this.querySelector('#pz-drop');
+      const changeBtn = this.querySelector('#pz-change');
+      if (!input) return;
+
+      selectBtn?.addEventListener('click', () => input.click());
+      drop?.addEventListener('click', (e) => { if (e.target !== selectBtn) input.click(); });
+      input.addEventListener('change', () => { if (input.files[0]) this._handleFile(input.files[0]); });
+
+      drop?.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('drag-over'); });
+      drop?.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+      drop?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        drop.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file?.type.startsWith('image/')) this._handleFile(file);
+      });
+
+      changeBtn?.addEventListener('click', () => {
+        input.value = '';
+        this.querySelector('#pz-upload').hidden = false;
+        this.querySelector('#pz-panel').hidden  = true;
+        this._uploadPromise = null;
+      });
+    }
+
+    _handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = this.querySelector('#pz-img');
+        if (img) img.src = e.target.result;
+        this.querySelector('#pz-upload').hidden = true;
+        this.querySelector('#pz-panel').hidden  = false;
+      };
+      reader.readAsDataURL(file);
+      this._uploadPromise = this._uploadToCloudinary(file);
+    }
+
+    async _uploadToCloudinary(file) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', 'ipaperclub');
+      const res = await fetch('https://api.cloudinary.com/v1_1/dp9wibnvk/image/upload', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error('upload failed');
+      const data = await res.json();
+      return data.secure_url;
+    }
+
+    _bindSwatches() {
+      this.querySelectorAll('.pz-swatch').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          this._selectedFrame = btn.dataset.frame;
+          const frame = this.querySelector('#pz-frame');
+          if (frame) frame.className = `frame-preview frame-preview--${btn.dataset.frame}`;
+          const frameImg = this.querySelector('#pz-frame-img');
+          if (frameImg) frameImg.src = this._frameImages[btn.dataset.frame] || '';
+          const labelEl = this.querySelector('#pz-frame-label');
+          if (labelEl) labelEl.textContent = btn.dataset.label;
+          this.querySelectorAll('.pz-swatch').forEach((s) => {
+            s.classList.toggle('active', s === btn);
+            s.setAttribute('aria-pressed', String(s === btn));
+          });
+        });
+      });
+    }
+
+    _bindSizes() {
+      this.querySelectorAll('.pz-size-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          this._selectedSize = btn.dataset.size;
+          this.querySelector('.pz-frame-wrap')?.style.setProperty('--pz-ratio', `${btn.dataset.w}/${btn.dataset.h}`);
+          this.querySelectorAll('.pz-size-btn').forEach((s) => s.classList.toggle('active', s === btn));
+          this.querySelectorAll('.pz-silhouette__frame').forEach((f) => f.classList.toggle('active', f.dataset.size === btn.dataset.size));
+          const cta = this.querySelector('#pz-cta');
+          if (cta) { cta.disabled = false; cta.textContent = 'Comprar'; }
+        });
+      });
+    }
+
+    _bindCta() {
+      this.querySelector('#pz-cta')?.addEventListener('click', () => this._addToCart());
+    }
+
+    async _addToCart() {
+      const cta = this.querySelector('#pz-cta');
+      const errorEl = this.querySelector('#pz-error');
+      cta.disabled = true;
+      cta.textContent = 'Enviando imagem…';
+      if (errorEl) errorEl.hidden = true;
+
+      let imageUrl;
+      try {
+        imageUrl = await this._uploadPromise;
+      } catch {
+        this._showError('Erro ao enviar a imagem. Tente novamente.');
+        cta.disabled = false; cta.textContent = 'Comprar'; return;
+      }
+
+      cta.textContent = 'Adicionando ao carrinho…';
+      let product;
+      try {
+        const res = await fetch('/products/quadro-personalizado.js');
+        if (!res.ok) throw new Error();
+        product = await res.json();
+      } catch {
+        this._showError('Produto não encontrado. Entre em contato com o suporte.');
+        cta.disabled = false; cta.textContent = 'Comprar'; return;
+      }
+
+      const frameLabel = { white: 'Branca', black: 'Preta', oak: 'Madeira' }[this._selectedFrame];
+      const variant = product.variants.find((v) => {
+        const opts = [v.option1, v.option2, v.option3].filter(Boolean);
+        return opts.includes(this._selectedSize) && opts.includes(frameLabel);
+      });
+
+      if (!variant) {
+        this._showError('Combinação indisponível. Tente outra opção.');
+        cta.disabled = false; cta.textContent = 'Comprar'; return;
+      }
+
+      try {
+        const res = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: [{ id: variant.id, quantity: 1, properties: { 'Imagem personalizada': imageUrl, 'Tamanho': this._selectedSize, 'Moldura': frameLabel } }]
+          }),
+        });
+        if (!res.ok) throw new Error();
+        window.location.href = '/cart';
+      } catch {
+        this._showError('Erro ao adicionar ao carrinho. Tente novamente.');
+        cta.disabled = false; cta.textContent = 'Comprar';
+      }
+    }
+
+    _showError(msg) {
+      const el = this.querySelector('#pz-error');
+      if (!el) return;
+      el.textContent = msg;
+      el.hidden = false;
+    }
+  }
+
+  if (!customElements.get('personalizados-page')) {
+    customElements.define('personalizados-page', PersonalizadosPage);
+  }
+</script>
