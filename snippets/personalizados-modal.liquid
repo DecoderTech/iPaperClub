@@ -1,0 +1,105 @@
+<style>
+  body.pz-modal-open { overflow: hidden; }
+  .pz-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .pz-modal[hidden] { display: none !important; }
+  .pz-modal__backdrop { position: absolute; inset: 0; background: rgb(0 0 0 / 0.6); cursor: pointer; }
+  .pz-modal__dialog {
+    position: relative;
+    background: rgb(var(--color-background-rgb, 255 255 255));
+    width: 100%;
+    max-width: 980px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgb(0 0 0 / 0.25);
+  }
+  .pz-modal__header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    background: rgb(var(--color-background-rgb, 255 255 255));
+    border-bottom: 1px solid rgb(var(--color-border-rgb, 0 0 0) / 0.08);
+  }
+  .pz-modal__title { font-size: var(--font-size--lg); font-weight: 600; margin: 0; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pz-modal__close {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: none; background: transparent; cursor: pointer;
+    color: inherit; transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .pz-modal__close:hover { background: rgb(var(--color-foreground-rgb, 0 0 0) / 0.08); }
+  .pz-modal__body { flex: 1; }
+  .pz-modal .personalizados { min-height: unset; padding: 24px; }
+  @media screen and (max-width: 749px) {
+    .pz-modal { padding: 0; align-items: flex-end; }
+    .pz-modal__dialog { max-height: 95vh; border-radius: 20px 20px 0 0; }
+    .pz-modal .personalizados { padding: 16px; }
+  }
+</style>
+
+<div id="pz-modal" class="pz-modal" hidden role="dialog" aria-modal="true" aria-label="Quadro Personalizado">
+  <div class="pz-modal__backdrop" id="pz-modal-backdrop"></div>
+  <div class="pz-modal__dialog">
+    <div class="pz-modal__header">
+      <span class="pz-modal__title">Quadro Personalizado</span>
+      <button class="pz-modal__close" id="pz-modal-close" type="button" aria-label="Fechar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 3L3 13M13 13L3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="pz-modal__body">
+      {% render 'personalizados-content' %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const modal = document.getElementById('pz-modal');
+    if (!modal) return;
+
+    function openModal() {
+      modal.removeAttribute('hidden');
+      document.body.classList.add('pz-modal-open');
+      modal.querySelector('#pz-modal-close')?.focus();
+    }
+
+    function closeModal() {
+      modal.setAttribute('hidden', '');
+      document.body.classList.remove('pz-modal-open');
+      const upload = modal.querySelector('#pz-upload');
+      const panel  = modal.querySelector('#pz-panel');
+      if (upload) upload.hidden = false;
+      if (panel)  panel.hidden  = true;
+      const fileInput = modal.querySelector('#pz-file');
+      if (fileInput) fileInput.value = '';
+      const cta = modal.querySelector('#pz-cta');
+      if (cta) { cta.disabled = true; cta.textContent = 'Selecione um tamanho'; }
+      modal.querySelectorAll('.pz-size-btn').forEach(b => b.classList.remove('active'));
+      modal.querySelectorAll('.pz-silhouette__frame').forEach(f => f.classList.remove('active'));
+    }
+
+    document.getElementById('pz-modal-close')?.addEventListener('click', closeModal);
+    document.getElementById('pz-modal-backdrop')?.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href*="/pages/personalizados"]');
+      if (!link) return;
+      e.preventDefault();
+      openModal();
+    });
+
+    if (window.location.pathname.includes('/pages/personalizados')) {
+      openModal();
+    }
+  })();
+</script>
