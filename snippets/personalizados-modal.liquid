@@ -1,105 +1,590 @@
 <style>
   body.pz-modal-open { overflow: hidden; }
-  .pz-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+
+  /* ── Modal shell ── */
+  .pz-modal {
+    position: fixed; inset: 0; z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
   .pz-modal[hidden] { display: none !important; }
-  .pz-modal__backdrop { position: absolute; inset: 0; background: rgb(0 0 0 / 0.6); cursor: pointer; }
+  .pz-modal__backdrop { position: absolute; inset: 0; background: rgb(0 0 0 / 0.55); cursor: pointer; }
   .pz-modal__dialog {
     position: relative;
     background: rgb(var(--color-background-rgb, 255 255 255));
-    width: 100%;
-    max-width: 980px;
-    max-height: calc(100vh - 32px);
-    overflow-y: auto;
+    width: min(95vw, 980px);
+    height: min(92vh, 720px);
     border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 24px 80px rgb(0 0 0 / 0.25);
+    box-shadow: 0 24px 80px rgb(0 0 0 / 0.3);
+    display: flex; flex-direction: column;
+    overflow: hidden;
   }
-  .pz-modal__header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 24px 16px;
-    background: rgb(var(--color-background-rgb, 255 255 255));
-    border-bottom: 1px solid rgb(var(--color-border-rgb, 0 0 0) / 0.08);
+
+  /* ── Header ── */
+  .pz-mh {
+    flex-shrink: 0; height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid rgb(var(--color-border-rgb, 0 0 0) / 0.1);
   }
-  .pz-modal__title { font-size: var(--font-size--lg); font-weight: 600; margin: 0; letter-spacing: 0.04em; text-transform: uppercase; }
-  .pz-modal__close {
+  .pz-mh__back {
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: none; cursor: pointer; color: inherit;
+    font-size: var(--font-size--sm); padding: 6px 10px; border-radius: 6px;
+    transition: background 0.15s; min-width: 80px;
+  }
+  .pz-mh__back:hover { background: rgb(var(--color-foreground-rgb) / 0.06); }
+  .pz-mh__back[hidden] { visibility: hidden; pointer-events: none; }
+  .pz-mh__steps { display: flex; align-items: center; gap: 6px; }
+  .pz-mh__dot {
+    height: 7px; border-radius: 4px; background: rgb(var(--color-border-rgb) / 0.3);
+    transition: width 0.25s, background 0.25s; width: 7px;
+  }
+  .pz-mh__dot.active { width: 22px; background: rgb(var(--color-foreground-rgb)); }
+  .pz-mh__close {
+    display: flex; align-items: center; justify-content: flex-end;
+    width: 36px; height: 36px; min-width: 80px;
+    background: none; border: none; cursor: pointer; color: inherit;
+    border-radius: 50%; transition: background 0.15s;
+  }
+  .pz-mh__close:hover { background: rgb(var(--color-foreground-rgb) / 0.08); }
+
+  /* ── Steps ── */
+  .pz-step { flex: 1; min-height: 0; overflow: hidden; display: flex; }
+  .pz-step[hidden] { display: none !important; }
+
+  /* Step 1 – Upload / Login */
+  .pz-s1 { align-items: center; justify-content: center; }
+  .pz-login-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 14px; max-width: 360px; text-align: center; padding: 24px;
+  }
+  .pz-login-wrap svg { opacity: 0.35; }
+  .pz-login-wrap h2 { margin: 0; }
+  .pz-login-wrap p { opacity: 0.6; margin: 0; }
+  .pz-login-btns { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .pz-login-btns .button { width: 100%; justify-content: center; }
+  .pz-dropzone {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    border: 2px dashed rgb(var(--color-border-rgb));
+    border-radius: 16px; padding: 52px 40px; max-width: 460px; width: 100%;
+    text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .pz-dropzone.drag-over {
+    border-color: rgb(var(--color-foreground-rgb));
+    background: rgb(var(--color-foreground-rgb) / 0.04);
+  }
+  .pz-dropzone svg { opacity: 0.4; }
+  .pz-dropzone__title { font-size: var(--font-size--lg); font-weight: 600; margin: 0; }
+  .pz-dropzone__hint { font-size: var(--font-size--sm); opacity: 0.5; margin: 0; }
+
+  /* Step 2 – Crop */
+  .pz-s2 { flex-direction: row; }
+  .pz-crop-stage {
+    flex-shrink: 0; height: 100%;
+    aspect-ratio: var(--pz-ratio, 2/3);
+    overflow: hidden; position: relative; background: #0a0a0a; cursor: grab;
+  }
+  .pz-crop-stage.dragging { cursor: grabbing; }
+  .pz-crop-stage img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 50%;
+    pointer-events: none; user-select: none; display: block;
+  }
+  .pz-crop-overlay-hint {
+    position: absolute; bottom: 10px; left: 0; right: 0; text-align: center;
+    font-size: 11px; color: #fff; opacity: 0.65; pointer-events: none;
+  }
+  .pz-crop-controls {
+    flex: 1; min-width: 0; height: 100%;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 32px 36px; gap: 24px;
+  }
+  .pz-crop-controls h3 { margin: 0; font-size: var(--font-size--lg); }
+  .pz-crop-controls p { margin: 0; font-size: var(--font-size--sm); opacity: 0.55; }
+  .pz-size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pz-size-card {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 14px 10px;
+    border: 2px solid rgb(var(--color-border-rgb));
+    border-radius: 10px; cursor: pointer;
+    background: transparent; color: inherit; font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .pz-size-card:hover { border-color: rgb(var(--color-foreground-rgb) / 0.35); }
+  .pz-size-card.active {
+    border-color: rgb(var(--color-foreground-rgb));
+    background: rgb(var(--color-foreground-rgb) / 0.04);
+  }
+  .pz-size-card__box {
+    background: rgb(var(--color-foreground-rgb) / 0.1);
+    border: 1.5px solid rgb(var(--color-foreground-rgb) / 0.25);
+    border-radius: 3px; flex-shrink: 0;
+  }
+  .pz-size-card__name { font-size: var(--font-size--sm); font-weight: 600; }
+
+  /* Step 3 – Frame */
+  .pz-s3 { flex-direction: row; }
+  .pz-frame-stage {
+    flex-shrink: 0; height: 100%;
+    aspect-ratio: var(--pz-ratio, 2/3);
+    overflow: hidden; position: relative; background: #fff;
+  }
+  .pz-frame-inner {
+    width: 100%; height: 100%;
+    padding: 6% 11%; box-sizing: border-box;
     display: flex; align-items: center; justify-content: center;
-    width: 36px; height: 36px; border-radius: 50%;
-    border: none; background: transparent; cursor: pointer;
-    color: inherit; transition: background 0.15s;
-    flex-shrink: 0;
   }
-  .pz-modal__close:hover { background: rgb(var(--color-foreground-rgb, 0 0 0) / 0.08); }
-  .pz-modal__body { flex: 1; }
-  .pz-modal .personalizados { min-height: unset; padding: 24px; }
+  .pz-frame-inner img.artwork {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 50%;
+    display: block;
+  }
+  img.pz-moldura {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: fill; pointer-events: none;
+  }
+  .pz-frame-controls {
+    flex: 1; min-width: 0; height: 100%;
+    display: flex; flex-direction: column;
+    padding: 24px 32px; gap: 16px; overflow: hidden;
+  }
+  .pz-opt-label { font-size: var(--font-size--sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+  .pz-swatches { display: flex; gap: 10px; }
+  .pz-swatch {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 3px solid transparent; cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+    background: none;
+  }
+  .pz-swatch:hover { transform: scale(1.1); }
+  .pz-swatch.active { border-color: rgb(var(--color-foreground-rgb)); }
+  .pz-swatch--white { background: #f5f5f0; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12); }
+  .pz-swatch--black { background: #1a1a1a; }
+  .pz-swatch--oak { background: linear-gradient(135deg, #c8a46e 0%, #a07840 50%, #c8a46e 100%); }
+  .pz-sil-wrap { flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: flex-end; }
+  .pz-sil-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; object-position: bottom left; display: block; }
+  .pz-buy-btn { width: 100%; justify-content: center; flex-shrink: 0; }
+  .pz-buy-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Footer */
+  .pz-mf {
+    flex-shrink: 0; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; gap: 16px;
+    border-top: 1px solid rgb(var(--color-border-rgb) / 0.1);
+  }
+  .pz-mf__hint { font-size: var(--font-size--sm); opacity: 0.5; flex: 1; min-width: 0; }
+  .pz-mf__error { font-size: var(--font-size--sm); color: #c0392b; flex: 1; min-width: 0; }
+
+  /* Mobile */
   @media screen and (max-width: 749px) {
     .pz-modal { padding: 0; align-items: flex-end; }
-    .pz-modal__dialog { max-height: 95vh; border-radius: 20px 20px 0 0; }
-    .pz-modal .personalizados { padding: 16px; }
+    .pz-modal__dialog { width: 100%; height: 95dvh; border-radius: 20px 20px 0 0; }
+    .pz-s2, .pz-s3 { flex-direction: column; }
+    .pz-crop-stage, .pz-frame-stage { height: 52%; width: 100% !important; aspect-ratio: unset; flex-shrink: 0; }
+    .pz-crop-controls, .pz-frame-controls { flex: 1; overflow-y: auto; padding: 16px; }
+    .pz-size-grid { grid-template-columns: repeat(4, 1fr); }
   }
 </style>
 
-<div id="pz-modal" class="pz-modal" hidden role="dialog" aria-modal="true" aria-label="Quadro Personalizado">
-  <div class="pz-modal__backdrop" id="pz-modal-backdrop"></div>
+<div id="pz-modal" class="pz-modal" hidden role="dialog" aria-modal="true">
+  <div class="pz-modal__backdrop" id="pz-backdrop"></div>
   <div class="pz-modal__dialog">
-    <div class="pz-modal__header">
-      <span class="pz-modal__title">Quadro Personalizado</span>
-      <button class="pz-modal__close" id="pz-modal-close" type="button" aria-label="Fechar">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M13 3L3 13M13 13L3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
+
+    <!-- Header -->
+    <div class="pz-mh">
+      <button class="pz-mh__back" id="pz-back" hidden type="button">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Voltar
+      </button>
+      <div class="pz-mh__steps">
+        <div class="pz-mh__dot active" id="pz-dot-1"></div>
+        <div class="pz-mh__dot" id="pz-dot-2"></div>
+        <div class="pz-mh__dot" id="pz-dot-3"></div>
+      </div>
+      <button class="pz-mh__close" id="pz-close" type="button" aria-label="Fechar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 3L3 13M13 13L3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div class="pz-modal__body">
-      {% render 'personalizados-content' %}
+
+    <!-- Step 1: Upload / Login -->
+    <div class="pz-step pz-s1" id="pz-s1">
+      {% unless customer %}
+        <div class="pz-login-wrap">
+          <svg width="56" height="56" viewBox="0 0 48 48" fill="none"><rect x="8" y="6" width="24" height="30" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 36v4h24V14h-8" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="18" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 30c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <h2 class="h3">Quadro Personalizado</h2>
+          <p>Para criar seu quadro com sua imagem, faça login primeiro.</p>
+          <div class="pz-login-btns">
+            <script src="{{ 'account-login-actions.js' | asset_url }}" type="module" fetchpriority="low"></script>
+            <account-login-actions>{{ shop | login_button }}</account-login-actions>
+            <a href="{{ routes.account_login_url }}" class="button button-secondary">Entrar com email</a>
+          </div>
+        </div>
+      {% else %}
+        <div class="pz-dropzone" id="pz-drop">
+          <input type="file" id="pz-file" accept="image/*" hidden>
+          <svg width="56" height="56" viewBox="0 0 64 64" fill="none"><rect x="8" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="28" r="4" stroke="currentColor" stroke-width="2"/><path d="M8 42l12-10 8 8 8-6 20 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 8v16M26 12l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p class="pz-dropzone__title">Envie sua imagem</p>
+          <p class="pz-dropzone__hint">Arraste aqui ou clique para selecionar · qualidade original preservada</p>
+          <button class="button" id="pz-select-btn" type="button">Selecionar arquivo</button>
+        </div>
+      {% endunless %}
     </div>
+
+    <!-- Step 2: Crop -->
+    <div class="pz-step pz-s2" id="pz-s2" hidden>
+      <div class="pz-crop-stage" id="pz-crop-stage">
+        <img id="pz-crop-img" src="" alt="">
+        <span class="pz-crop-overlay-hint">Arraste para reposicionar</span>
+      </div>
+      <div class="pz-crop-controls">
+        <div>
+          <h3>Escolha o tamanho</h3>
+          <p>O recorte se ajusta à proporção do quadro selecionado</p>
+        </div>
+        <div class="pz-size-grid" id="pz-size-grid">
+          <button class="pz-size-card" data-size="20x30cm" data-w="20" data-h="30" type="button">
+            <div class="pz-size-card__box" style="width:32px;height:48px"></div>
+            <span class="pz-size-card__name">20×30cm</span>
+          </button>
+          <button class="pz-size-card" data-size="30x40cm" data-w="30" data-h="40" type="button">
+            <div class="pz-size-card__box" style="width:36px;height:48px"></div>
+            <span class="pz-size-card__name">30×40cm</span>
+          </button>
+          <button class="pz-size-card" data-size="40x60cm" data-w="40" data-h="60" type="button">
+            <div class="pz-size-card__box" style="width:32px;height:48px"></div>
+            <span class="pz-size-card__name">40×60cm</span>
+          </button>
+          <button class="pz-size-card" data-size="60x90cm" data-w="60" data-h="90" type="button">
+            <div class="pz-size-card__box" style="width:32px;height:48px"></div>
+            <span class="pz-size-card__name">60×90cm</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Frame -->
+    <div class="pz-step pz-s3" id="pz-s3" hidden>
+      <div class="pz-frame-stage" id="pz-frame-stage">
+        <div class="pz-frame-inner">
+          <img class="artwork" id="pz-artwork" src="" alt="">
+        </div>
+        <img class="pz-moldura" id="pz-moldura" src="{{ 'moldura_white_fixed.png' | asset_url }}" alt="">
+      </div>
+      <div class="pz-frame-controls">
+        <div>
+          <p class="pz-opt-label">Moldura: <strong id="pz-frame-label">Branca</strong></p>
+          <div class="pz-swatches">
+            <button class="pz-swatch pz-swatch--white active" data-frame="white" data-label="Branca" title="Branca" type="button"></button>
+            <button class="pz-swatch pz-swatch--black" data-frame="black" data-label="Preta" title="Preta" type="button"></button>
+            <button class="pz-swatch pz-swatch--oak" data-frame="oak" data-label="Madeira" title="Madeira" type="button"></button>
+          </div>
+        </div>
+        <div class="pz-sil-wrap">
+          <img src="{{ 'tamanho.jpg' | asset_url }}" alt="Comparação de tamanhos">
+        </div>
+        <p class="pz-mf__error" id="pz-error" hidden></p>
+        <button class="button pz-buy-btn" id="pz-buy" type="button" disabled>Comprar</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="pz-mf">
+      <span class="pz-mf__hint" id="pz-hint">Etapa 1 de 3</span>
+      <button class="button" id="pz-next" type="button" disabled>Próximo</button>
+    </div>
+
   </div>
 </div>
 
 <script>
-  (function () {
-    const modal = document.getElementById('pz-modal');
-    if (!modal) return;
+(function () {
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 
-    function openModal() {
-      modal.removeAttribute('hidden');
-      document.body.classList.add('pz-modal-open');
-      modal.querySelector('#pz-modal-close')?.focus();
+  const modal   = document.getElementById('pz-modal');
+  if (!modal) return;
+
+  const frameUrls = {
+    white: {{ 'moldura_white_fixed.png' | asset_url | json }},
+    black: {{ 'moldura_black_fixed.png' | asset_url | json }},
+    oak:   {{ 'moldura_oak_fixed.png'   | asset_url | json }},
+  };
+
+  // State
+  let step = 1;
+  let objectUrl = null;
+  let uploadPromise = null;
+  let cropX = 50, cropY = 50;
+  let selectedSize = null, selectedW = 2, selectedH = 3;
+  let selectedFrame = 'white';
+
+  // Elements
+  const s1 = document.getElementById('pz-s1');
+  const s2 = document.getElementById('pz-s2');
+  const s3 = document.getElementById('pz-s3');
+  const cropStage  = document.getElementById('pz-crop-stage');
+  const cropImg    = document.getElementById('pz-crop-img');
+  const artworkImg = document.getElementById('pz-artwork');
+  const molduraImg = document.getElementById('pz-moldura');
+  const frameStage = document.getElementById('pz-frame-stage');
+  const nextBtn    = document.getElementById('pz-next');
+  const backBtn    = document.getElementById('pz-back');
+  const hintEl     = document.getElementById('pz-hint');
+  const buyBtn     = document.getElementById('pz-buy');
+  const errorEl    = document.getElementById('pz-error');
+
+  // ── Modal open / close ──
+  function openModal() {
+    modal.removeAttribute('hidden');
+    document.body.classList.add('pz-modal-open');
+  }
+  function closeModal() {
+    modal.setAttribute('hidden', '');
+    document.body.classList.remove('pz-modal-open');
+    resetModal();
+  }
+  function resetModal() {
+    goToStep(1);
+    if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
+    uploadPromise = null;
+    cropX = 50; cropY = 50;
+    selectedSize = null;
+    const fi = document.getElementById('pz-file');
+    if (fi) fi.value = '';
+    document.querySelectorAll('.pz-size-card').forEach(b => b.classList.remove('active'));
+  }
+
+  document.getElementById('pz-close')?.addEventListener('click', closeModal);
+  document.getElementById('pz-backdrop')?.addEventListener('click', closeModal);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+  document.addEventListener('click', e => {
+    const link = e.target.closest('a[href*="/pages/personalizados"]');
+    if (!link) return;
+    e.preventDefault();
+    openModal();
+  });
+  if (window.location.pathname.includes('/pages/personalizados')) openModal();
+
+  // ── Step navigation ──
+  function goToStep(n) {
+    step = n;
+    s1.hidden = n !== 1;
+    s2.hidden = n !== 2;
+    s3.hidden = n !== 3;
+    backBtn.hidden = n === 1;
+    document.querySelectorAll('.pz-mh__dot').forEach((d, i) => d.classList.toggle('active', i + 1 === n));
+
+    if (n === 1) {
+      nextBtn.textContent = 'Próximo';
+      nextBtn.disabled = !objectUrl;
+      hintEl.textContent = 'Etapa 1 de 3';
+      nextBtn.style.display = '';
+    } else if (n === 2) {
+      nextBtn.textContent = 'Próximo';
+      nextBtn.disabled = !selectedSize;
+      hintEl.textContent = selectedSize ? '' : 'Selecione um tamanho para continuar';
+      nextBtn.style.display = '';
+    } else if (n === 3) {
+      nextBtn.style.display = 'none';
+      hintEl.textContent = '';
+      syncArtwork();
     }
+  }
 
-    function closeModal() {
-      modal.setAttribute('hidden', '');
-      document.body.classList.remove('pz-modal-open');
-      const upload = modal.querySelector('#pz-upload');
-      const panel  = modal.querySelector('#pz-panel');
-      if (upload) upload.hidden = false;
-      if (panel)  panel.hidden  = true;
-      const fileInput = modal.querySelector('#pz-file');
-      if (fileInput) fileInput.value = '';
-      const cta = modal.querySelector('#pz-cta');
-      if (cta) { cta.disabled = true; cta.textContent = 'Selecione um tamanho'; }
-      modal.querySelectorAll('.pz-size-btn').forEach(b => b.classList.remove('active'));
-      modal.querySelectorAll('.pz-silhouette__frame').forEach(f => f.classList.remove('active'));
-    }
+  backBtn.addEventListener('click', () => goToStep(step - 1));
+  nextBtn.addEventListener('click', () => goToStep(step + 1));
 
-    document.getElementById('pz-modal-close')?.addEventListener('click', closeModal);
-    document.getElementById('pz-modal-backdrop')?.addEventListener('click', closeModal);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+  // ── Upload ──
+  const fileInput  = document.getElementById('pz-file');
+  const selectBtn  = document.getElementById('pz-select-btn');
+  const dropZone   = document.getElementById('pz-drop');
 
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a[href*="/pages/personalizados"]');
-      if (!link) return;
-      e.preventDefault();
-      openModal();
+  selectBtn?.addEventListener('click', () => fileInput?.click());
+  dropZone?.addEventListener('click', e => { if (e.target !== selectBtn) fileInput?.click(); });
+  fileInput?.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+  dropZone?.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone?.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone?.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f?.type.startsWith('image/')) handleFile(f);
+  });
+
+  function handleFile(file) {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = URL.createObjectURL(file);
+    cropX = 50; cropY = 50;
+    cropImg.src = objectUrl;
+    cropImg.style.objectPosition = '50% 50%';
+    uploadPromise = uploadToCloudinary(file);
+    nextBtn.disabled = false;
+  }
+
+  async function uploadToCloudinary(file) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', 'ipaperclub');
+    const res = await fetch('https://api.cloudinary.com/v1_1/dp9wibnvk/image/upload', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('upload failed');
+    return (await res.json()).secure_url;
+  }
+
+  // ── Crop drag (on crop stage) ──
+  let dragging = false, dragStartX, dragStartY, dragCropX, dragCropY;
+
+  function getOverflow() {
+    const cW = cropStage.offsetWidth, cH = cropStage.offsetHeight;
+    const nW = cropImg.naturalWidth || 1, nH = cropImg.naturalHeight || 1;
+    const scale = Math.max(cW / nW, cH / nH);
+    return { x: Math.max(0, nW * scale - cW), y: Math.max(0, nH * scale - cH) };
+  }
+
+  cropStage.addEventListener('mousedown', e => {
+    e.preventDefault();
+    dragging = true; dragStartX = e.clientX; dragStartY = e.clientY;
+    dragCropX = cropX; dragCropY = cropY;
+    cropStage.classList.add('dragging');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const { x: ovX, y: ovY } = getOverflow();
+    cropX = ovX > 0 ? clamp(dragCropX - (e.clientX - dragStartX) / ovX * 100, 0, 100) : 50;
+    cropY = ovY > 0 ? clamp(dragCropY - (e.clientY - dragStartY) / ovY * 100, 0, 100) : 50;
+    cropImg.style.objectPosition = `${cropX}% ${cropY}%`;
+  });
+  window.addEventListener('mouseup', () => { dragging = false; cropStage.classList.remove('dragging'); });
+  cropStage.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    dragging = true; dragStartX = t.clientX; dragStartY = t.clientY;
+    dragCropX = cropX; dragCropY = cropY;
+  }, { passive: false });
+  cropStage.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!dragging) return;
+    const t = e.touches[0];
+    const { x: ovX, y: ovY } = getOverflow();
+    cropX = ovX > 0 ? clamp(dragCropX - (t.clientX - dragStartX) / ovX * 100, 0, 100) : 50;
+    cropY = ovY > 0 ? clamp(dragCropY - (t.clientY - dragStartY) / ovY * 100, 0, 100) : 50;
+    cropImg.style.objectPosition = `${cropX}% ${cropY}%`;
+  }, { passive: false });
+  cropStage.addEventListener('touchend', () => { dragging = false; });
+
+  // ── Size selection ──
+  document.getElementById('pz-size-grid')?.querySelectorAll('.pz-size-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedSize = btn.dataset.size;
+      selectedW = +btn.dataset.w;
+      selectedH = +btn.dataset.h;
+      const ratio = `${selectedW}/${selectedH}`;
+      cropStage.style.setProperty('--pz-ratio', ratio);
+      frameStage.style.setProperty('--pz-ratio', ratio);
+      cropX = 50; cropY = 50;
+      cropImg.style.objectPosition = '50% 50%';
+      document.querySelectorAll('.pz-size-card').forEach(b => b.classList.toggle('active', b === btn));
+      nextBtn.disabled = false;
+      hintEl.textContent = '';
     });
+  });
 
-    if (window.location.pathname.includes('/pages/personalizados')) {
-      openModal();
+  // ── Frame (step 3) ──
+  function syncArtwork() {
+    artworkImg.src = objectUrl || '';
+    artworkImg.style.objectPosition = `${cropX}% ${cropY}%`;
+    buyBtn.disabled = false;
+  }
+
+  document.querySelectorAll('.pz-swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedFrame = btn.dataset.frame;
+      molduraImg.src = frameUrls[selectedFrame];
+      document.getElementById('pz-frame-label').textContent = btn.dataset.label;
+      document.querySelectorAll('.pz-swatch').forEach(s => s.classList.toggle('active', s === btn));
+    });
+  });
+
+  // ── Buy ──
+  buyBtn.addEventListener('click', addToCart);
+
+  async function addToCart() {
+    buyBtn.disabled = true;
+    buyBtn.textContent = 'Enviando imagem…';
+    if (errorEl) errorEl.hidden = true;
+
+    let imageUrl;
+    try { imageUrl = await uploadPromise; }
+    catch {
+      showError('Erro ao enviar a imagem. Tente novamente.');
+      buyBtn.disabled = false; buyBtn.textContent = 'Comprar'; return;
     }
-  })();
+
+    const crop = getCropParams();
+    const finalUrl = buildCroppedUrl(imageUrl, crop);
+
+    buyBtn.textContent = 'Adicionando ao carrinho…';
+    let product;
+    try {
+      const r = await fetch('/products/quadro-personalizado.js');
+      if (!r.ok) throw new Error();
+      product = await r.json();
+    } catch {
+      showError('Produto não encontrado. Entre em contato com o suporte.');
+      buyBtn.disabled = false; buyBtn.textContent = 'Comprar'; return;
+    }
+
+    const frameLabel = { white: 'Branca', black: 'Preta', oak: 'Madeira' }[selectedFrame];
+    const variant = product.variants.find(v => {
+      const opts = [v.option1, v.option2, v.option3].filter(Boolean);
+      return opts.includes(selectedSize) && opts.includes(frameLabel);
+    });
+    if (!variant) {
+      showError('Combinação indisponível. Tente outra opção.');
+      buyBtn.disabled = false; buyBtn.textContent = 'Comprar'; return;
+    }
+
+    try {
+      const r = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: [{ id: variant.id, quantity: 1, properties: { 'Imagem personalizada': finalUrl, 'Tamanho': selectedSize, 'Moldura': frameLabel } }] }),
+      });
+      if (!r.ok) throw new Error();
+      window.location.href = '/cart';
+    } catch {
+      showError('Erro ao adicionar ao carrinho. Tente novamente.');
+      buyBtn.disabled = false; buyBtn.textContent = 'Comprar';
+    }
+  }
+
+  function getCropParams() {
+    const cW = cropStage.offsetWidth, cH = cropStage.offsetHeight;
+    const nW = cropImg.naturalWidth, nH = cropImg.naturalHeight;
+    if (!nW) return null;
+    const scale = Math.max(cW / nW, cH / nH);
+    const ovX = Math.max(0, nW * scale - cW);
+    const ovY = Math.max(0, nH * scale - cH);
+    return {
+      x: Math.round(ovX * cropX / 100 / scale),
+      y: Math.round(ovY * cropY / 100 / scale),
+      w: Math.round(cW / scale),
+      h: Math.round(cH / scale),
+    };
+  }
+
+  function buildCroppedUrl(url, crop) {
+    if (!crop || (!crop.x && !crop.y)) return url;
+    return url.replace('/upload/', `/upload/c_crop,x_${crop.x},y_${crop.y},w_${crop.w},h_${crop.h}/`);
+  }
+
+  function showError(msg) {
+    if (!errorEl) return;
+    errorEl.textContent = msg;
+    errorEl.hidden = false;
+  }
+
+  goToStep(1);
+})();
 </script>
