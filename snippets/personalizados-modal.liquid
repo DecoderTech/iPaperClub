@@ -113,12 +113,13 @@
   }
   .pz-frame-inner {
     position: relative;
-    width: 70%; /* proporcional, a altura é definida pelo aspect-ratio */
+    width: 68%;
     aspect-ratio: var(--pz-ratio, 2/3);
+    flex-shrink: 0;
   }
   .pz-frame-inner img.pz-artwork {
-    position: absolute; inset: 8% 14%; /* margem interna = área visível da moldura */
-    width: calc(100% - 28%); height: calc(100% - 16%);
+    position: absolute;
+    top: 8%; left: 13%; right: 13%; bottom: 8%;
     object-fit: cover; display: block;
   }
   img.pz-moldura-img {
