@@ -206,7 +206,7 @@
                     "text_specs": {
                       "type": "text",
                       "settings": {
-                        "text": "<p><strong>Tamanho:</strong> A6 (14 × 9 cm), formato landscape<br/><strong>Miolo:</strong> 100 folhas (200 páginas) · papel pólen 80g · pautado · impressão preto e branco frente e verso<br/><strong>Capa:</strong> dura em papel cartão<br/><strong>Encadernação:</strong> wire-o (espiral metálica) na parte superior. Abre 360º.</p>",
+                        "text": "<p><strong>Tamanho:</strong> A6 (14 × 9 cm), formato landscape<br/><strong>Miolo:</strong> 100 folhas (200 páginas) · papel pólen 80g · em branco (sem pauta)<br/><strong>Capa:</strong> dura em papel cartão<br/><strong>Encadernação:</strong> wire-o (espiral metálica) na parte superior. Abre 360º.</p>",
                         "width": "100%",
                         "max_width": "normal",
                         "alignment": "left",
