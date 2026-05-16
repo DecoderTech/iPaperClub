@@ -1,0 +1,780 @@
+{%- doc -%}
+  Renders the personalized-frame canvas used on the quadro-personalizado product page.
+  Replaces the standard product media gallery: it accepts an image upload, lets the
+  user crop within the variant's aspect ratio, and renders a live preview of the
+  picture inside the selected frame. The final cropped Cloudinary URL is injected into
+  the buy-buttons form as a line-item property named "Imagem personalizada".
+
+  @param {object} product - The personalized product (used to detect initial variant).
+{%- enddoc -%}
+
+{%- liquid
+  assign initial_variant = product.selected_or_first_available_variant
+  assign initial_size = ''
+  assign initial_frame_key = 'white'
+  assign initial_frame_label = 'Branca'
+
+  for opt in initial_variant.options
+    assign opt_dc = opt | downcase
+    if opt_dc contains 'cm' or opt_dc contains 'x'
+      assign initial_size = opt
+    endif
+    if opt_dc contains 'branca'
+      assign initial_frame_key = 'white'
+      assign initial_frame_label = opt
+    elsif opt_dc contains 'preta'
+      assign initial_frame_key = 'black'
+      assign initial_frame_label = opt
+    elsif opt_dc contains 'madeira'
+      assign initial_frame_key = 'oak'
+      assign initial_frame_label = opt
+    endif
+  endfor
+-%}
+
+<personalizados-canvas
+  class="pz-canvas"
+  data-product-id="{{ product.id }}"
+  data-frame-white="https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538"
+  data-frame-black="https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_black.png?v=1768429549"
+  data-frame-oak="https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_oak.png?v=1768429562"
+  data-initial-frame="{{ initial_frame_key }}"
+  data-initial-size="{{ initial_size }}"
+>
+    <div class="pz-canvas__dropzone" data-state="empty">
+      <input type="file" accept="image/*" hidden ref="fileInput" id="pz-canvas-file-{{ product.id }}">
+      <label for="pz-canvas-file-{{ product.id }}" class="pz-canvas__drop" ref="drop">
+        <svg class="pz-canvas__drop-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2"/>
+          <circle cx="22" cy="28" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 42l12-10 8 8 8-6 20 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M32 8v16M26 12l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="pz-canvas__drop-title">Envie sua imagem</p>
+        <p class="pz-canvas__drop-hint">Arraste aqui ou clique para selecionar · qualidade original preservada</p>
+        <span class="button pz-canvas__drop-btn">Selecionar arquivo</span>
+      </label>
+    </div>
+
+    <div class="pz-canvas__cropper" data-state="cropping" hidden>
+      <div class="pz-canvas__stage" ref="stage">
+        <img class="pz-canvas__full" alt="" draggable="false" ref="fullImg">
+        <div class="pz-canvas__sel" ref="selBox"></div>
+        <div class="pz-canvas__corner" data-corner="nw" ref="cornerNw"></div>
+        <div class="pz-canvas__corner" data-corner="ne" ref="cornerNe"></div>
+        <div class="pz-canvas__corner" data-corner="sw" ref="cornerSw"></div>
+        <div class="pz-canvas__corner" data-corner="se" ref="cornerSe"></div>
+      </div>
+      <p class="pz-canvas__hint">Arraste a janela ou os cantos para enquadrar a parte da imagem que entrará no quadro.</p>
+      <div class="pz-canvas__actions">
+        <button type="button" class="button button-secondary" data-action="change">Trocar imagem</button>
+        <button type="button" class="button" data-action="confirm">Confirmar enquadramento</button>
+      </div>
+    </div>
+
+    <div class="pz-canvas__preview" data-state="preview" hidden>
+      <div class="frame-preview pz-canvas__frame frame-preview--{{ initial_frame_key }}" ref="frameWrap">
+        <div class="frame-preview__inner pz-canvas__frame-inner" ref="frameInner">
+          <canvas class="pz-canvas__artwork" ref="artwork"></canvas>
+          <img class="frame-preview__frame-image pz-canvas__moldura" ref="moldura" src="https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538" alt="" loading="lazy">
+        </div>
+      </div>
+      <div class="pz-canvas__actions">
+        <button type="button" class="button button-secondary" data-action="change">Trocar imagem</button>
+        <button type="button" class="button button-secondary" data-action="recrop">Reenquadrar</button>
+      </div>
+    </div>
+
+    <p class="pz-canvas__error" hidden ref="error"></p>
+    <p class="pz-canvas__upload-status" hidden ref="status"></p>
+</personalizados-canvas>
+
+{% stylesheet %}
+  .pz-canvas {
+    display: block;
+    width: 100%;
+    padding-block: var(--padding-xl);
+  }
+  .pz-canvas [hidden] { display: none !important; }
+
+  /* ── Dropzone (empty) ── */
+  .pz-canvas__dropzone {
+    width: 100%;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pz-canvas__drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-sm);
+    border: 2px dashed rgb(var(--color-border-rgb));
+    border-radius: 12px;
+    padding: var(--padding-2xl) var(--padding-xl);
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .pz-canvas__drop.is-drag-over {
+    border-color: rgb(var(--color-foreground-rgb));
+    background: rgb(var(--color-foreground-rgb) / 0.04);
+  }
+  .pz-canvas__drop-icon { width: 56px; height: 56px; opacity: 0.45; }
+  .pz-canvas__drop-title { font-size: var(--font-size--lg); font-weight: 600; margin: 0; }
+  .pz-canvas__drop-hint { font-size: var(--font-size--sm); opacity: 0.55; margin: 0; }
+  .pz-canvas__drop-btn { margin-top: var(--gap-xs); pointer-events: none; }
+
+  /* ── Cropper (state 2) ── */
+  .pz-canvas__cropper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-md);
+  }
+  .pz-canvas__stage {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    height: 560px;
+    background: #1c1c1c;
+    overflow: hidden;
+    border-radius: 8px;
+    user-select: none;
+  }
+  .pz-canvas__full {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+  }
+  .pz-canvas__sel {
+    position: absolute;
+    z-index: 2;
+    border: 2px dashed rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.48);
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 33.33% 33.33%;
+    cursor: move;
+  }
+  .pz-canvas__corner {
+    position: absolute;
+    z-index: 4;
+    width: 22px;
+    height: 22px;
+    border-color: #fff;
+    border-style: solid;
+    touch-action: none;
+  }
+  .pz-canvas__corner[data-corner='nw'] { border-width: 3px 0 0 3px; cursor: nw-resize; }
+  .pz-canvas__corner[data-corner='ne'] { border-width: 3px 3px 0 0; cursor: ne-resize; }
+  .pz-canvas__corner[data-corner='sw'] { border-width: 0 0 3px 3px; cursor: sw-resize; }
+  .pz-canvas__corner[data-corner='se'] { border-width: 0 3px 3px 0; cursor: se-resize; }
+  .pz-canvas__hint {
+    font-size: var(--font-size--sm);
+    opacity: 0.55;
+    margin: 0;
+    text-align: center;
+  }
+  .pz-canvas__actions {
+    display: flex;
+    gap: var(--gap-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 560px;
+  }
+  .pz-canvas__actions .button { flex: 1 1 180px; justify-content: center; }
+
+  /* ── Preview (state 3) — mirrors the standard frame-preview ── */
+  .pz-canvas__preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-md);
+  }
+  .pz-canvas__frame {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .pz-canvas__frame-inner {
+    position: relative;
+    margin: 0 auto;
+    /* Width/height set inline by JS to match selected size aspect ratio */
+  }
+  .pz-canvas__artwork {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+  }
+  .pz-canvas__moldura {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @media screen and (max-width: 749px) {
+    .pz-canvas__frame { height: 460px; }
+    .pz-canvas__stage { height: 420px; }
+  }
+  @media screen and (min-width: 750px) {
+    .pz-canvas__frame { height: 600px; }
+  }
+
+  /* ── Feedback ── */
+  .pz-canvas__error {
+    color: #c0392b;
+    font-size: var(--font-size--sm);
+    margin: 0;
+    padding: var(--padding-sm);
+    background: rgb(192 57 43 / 0.08);
+    border-radius: 6px;
+    text-align: center;
+  }
+  .pz-canvas__upload-status {
+    font-size: var(--font-size--sm);
+    opacity: 0.6;
+    margin: 0;
+    text-align: center;
+  }
+{% endstylesheet %}
+
+<script type="module">
+  /* Personalizados canvas — upload, crop, framed preview, and form integration. */
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+
+  /* Map a variant option value to one of our three frame keys. */
+  function frameKeyFromOption(opt) {
+    const dc = (opt || '').toLowerCase();
+    if (dc.includes('branca')) return { key: 'white', label: opt };
+    if (dc.includes('preta')) return { key: 'black', label: opt };
+    if (dc.includes('madeira')) return { key: 'oak', label: opt };
+    return null;
+  }
+
+  /* Parse a size token like "20x30cm" or "30×40 cm" into { w, h }. */
+  function parseSize(opt) {
+    if (!opt) return null;
+    const m = opt.toLowerCase().replace('×', 'x').match(/(\d+)\s*x\s*(\d+)/);
+    if (!m) return null;
+    return { w: Number(m[1]), h: Number(m[2]), label: opt };
+  }
+
+  class PersonalizadosCanvas extends HTMLElement {
+    connectedCallback() {
+      if (this._initialized) return;
+      this._initialized = true;
+
+      this.refs = {};
+      this.querySelectorAll('[ref]').forEach((el) => (this.refs[el.getAttribute('ref')] = el));
+
+      this.frameUrls = {
+        white: this.dataset.frameWhite,
+        black: this.dataset.frameBlack,
+        oak: this.dataset.frameOak,
+      };
+
+      this.state = 'empty';
+      this.objectUrl = null;
+      this.uploadPromise = null;
+      this.cloudinaryUrl = null;
+      this.capturedCrop = null;
+      this.currentFrame = { key: this.dataset.initialFrame || 'white', label: 'Branca' };
+      this.currentSize = parseSize(this.dataset.initialSize) || { w: 20, h: 30, label: '20x30cm' };
+      /* Selector geometry in stage pixels. */
+      this.sel = { l: 0, t: 0, w: 0, h: 0 };
+      /* Moldura inset (transparent area as fraction of the PNG). Sensible default; refined async. */
+      this.moldInset = { l: 0.035, t: 0.020, r: 0.020, b: 0.030 };
+
+      this._measureMoldInset();
+      this._bindUpload();
+      this._bindActions();
+      this._bindVariantSync();
+      this._injectFormHooks();
+    }
+
+    /* Measure the transparent window of the frame PNG to position the canvas precisely. */
+    _measureMoldInset() {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const mW = img.naturalWidth;
+          const mH = img.naturalHeight;
+          const c = document.createElement('canvas');
+          c.width = mW;
+          c.height = mH;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const px = ctx.getImageData(0, 0, mW, mH).data;
+          const alp = (x, y) => px[(y * mW + x) * 4 + 3];
+          const mx = mW >> 1, my = mH >> 1, T = 32;
+          let l = 0, t = 0, r = 0, b = 0;
+          for (let x = 1; x < mx; x++) if (alp(x, my) < T) { l = x; break; }
+          for (let x = mW - 2; x > mx; x--) if (alp(x, my) < T) { r = mW - 1 - x; break; }
+          for (let y = 1; y < my; y++) if (alp(mx, y) < T) { t = y; break; }
+          for (let y = mH - 2; y > my; y--) if (alp(mx, y) < T) { b = mH - 1 - y; break; }
+          if (l > 0 && r > 0 && t > 0 && b > 0) {
+            this.moldInset = { l: l / mW, t: t / mH, r: r / mW, b: b / mH };
+            if (this.state === 'preview') this._renderPreview();
+          }
+        } catch (e) {
+          /* CORS blocked → keep default inset. */
+        }
+      };
+      const baseUrl = this.frameUrls.white;
+      img.src = baseUrl + (baseUrl.includes('?') ? '&' : '?') + '_cors=1';
+    }
+
+    /* ── State transitions ── */
+    _setState(next) {
+      this.state = next;
+      ['empty', 'cropping', 'preview'].forEach((name) => {
+        const el = this.querySelector(`[data-state="${name}"]`);
+        if (el) el.hidden = name !== next;
+      });
+    }
+
+    /* ── Upload (Cloudinary) ── */
+    _bindUpload() {
+      const { fileInput, drop } = this.refs;
+      if (!fileInput) return;
+
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) this._handleFile(fileInput.files[0]);
+      });
+
+      drop?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        drop.classList.add('is-drag-over');
+      });
+      drop?.addEventListener('dragleave', () => drop.classList.remove('is-drag-over'));
+      drop?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        drop.classList.remove('is-drag-over');
+        const f = e.dataTransfer.files[0];
+        if (f && f.type.startsWith('image/')) this._handleFile(f);
+      });
+    }
+
+    _handleFile(file) {
+      if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+      this.objectUrl = URL.createObjectURL(file);
+      this.cloudinaryUrl = null;
+      this.capturedCrop = null;
+      this._clearError();
+      this._setStatus('Enviando imagem em segundo plano…');
+
+      const img = this.refs.fullImg;
+      img.onload = () => {
+        img.onload = null;
+        this._setState('cropping');
+        requestAnimationFrame(() => this._initSelector());
+      };
+      img.src = this.objectUrl;
+
+      this.uploadPromise = this._uploadToCloudinary(file)
+        .then((url) => {
+          this.cloudinaryUrl = url;
+          this._setStatus('');
+          this._updateHiddenInput();
+          return url;
+        })
+        .catch(() => {
+          this._setStatus('');
+          this._showError('Não foi possível enviar a imagem. Tente novamente.');
+          throw new Error('upload failed');
+        });
+    }
+
+    async _uploadToCloudinary(file) {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', 'ipaperclub');
+      const res = await fetch('https://api.cloudinary.com/v1_1/dp9wibnvk/image/upload', {
+        method: 'POST',
+        body: fd,
+      });
+      if (!res.ok) throw new Error('cloudinary ' + res.status);
+      const data = await res.json();
+      return data.secure_url;
+    }
+
+    /* ── Action buttons (Trocar imagem, Confirmar, Reenquadrar) ── */
+    _bindActions() {
+      this.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        if (action === 'change') this._resetToEmpty();
+        else if (action === 'confirm') this._confirmCrop();
+        else if (action === 'recrop') {
+          this._setState('cropping');
+          requestAnimationFrame(() => this._initSelector(true));
+        }
+      });
+    }
+
+    _resetToEmpty() {
+      if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+      this.objectUrl = null;
+      this.uploadPromise = null;
+      this.cloudinaryUrl = null;
+      this.capturedCrop = null;
+      const input = this.refs.fileInput;
+      if (input) input.value = '';
+      this._clearError();
+      this._setStatus('');
+      this._updateHiddenInput();
+      this._setState('empty');
+    }
+
+    _confirmCrop() {
+      this._captureCrop();
+      this._setState('preview');
+      requestAnimationFrame(() => requestAnimationFrame(() => this._renderPreview()));
+      this._updateHiddenInput();
+    }
+
+    /* ── Variant picker sync ── */
+    _bindVariantSync() {
+      /* The product variant-picker dispatches 'variant:update' that bubbles up. We listen
+       * on the section root (closest .shopify-section) and react when it matches our product. */
+      const root = this.closest('.shopify-section') || document;
+      this._variantHandler = (event) => {
+        const detail = event.detail || {};
+        const productId = detail?.data?.productId;
+        if (productId && String(productId) !== String(this.dataset.productId)) return;
+        const variant = detail.resource;
+        if (!variant) return;
+
+        const opts = variant.options || [];
+        let nextSize = null;
+        let nextFrame = null;
+        for (const opt of opts) {
+          if (!nextSize) {
+            const s = parseSize(opt);
+            if (s) nextSize = s;
+          }
+          if (!nextFrame) {
+            const f = frameKeyFromOption(opt);
+            if (f) nextFrame = f;
+          }
+        }
+        if (nextSize) this._applySize(nextSize);
+        if (nextFrame) this._applyFrame(nextFrame);
+      };
+      root.addEventListener('variant:update', this._variantHandler);
+    }
+
+    _applySize(size) {
+      const ratioChanged =
+        !this.currentSize || size.w / size.h !== this.currentSize.w / this.currentSize.h;
+      this.currentSize = size;
+      if (this.state === 'cropping') {
+        this._initSelector(true);
+      } else if (this.state === 'preview') {
+        if (ratioChanged) {
+          /* Re-fit the selector to the new ratio, centered on the previous selection. */
+          this._initSelector(true, /* silent */ true);
+          this._captureCrop();
+        }
+        this._renderPreview();
+      }
+    }
+
+    _applyFrame(frame) {
+      this.currentFrame = frame;
+      const moldura = this.refs.moldura;
+      const frameWrap = this.refs.frameWrap;
+      if (moldura) moldura.src = this.frameUrls[frame.key] || '';
+      if (frameWrap) frameWrap.className = 'frame-preview pz-canvas__frame frame-preview--' + frame.key;
+    }
+
+    /* ── Crop selector ── */
+    _imgBounds() {
+      const stage = this.refs.stage;
+      const img = this.refs.fullImg;
+      if (!stage || !img) return null;
+      const sw = stage.offsetWidth, sh = stage.offsetHeight;
+      const nW = img.naturalWidth || 1, nH = img.naturalHeight || 1;
+      const sc = Math.min(sw / nW, sh / nH);
+      const iw = nW * sc, ih = nH * sc;
+      return { offX: (sw - iw) / 2, offY: (sh - ih) / 2, iw, ih, sc };
+    }
+
+    _initSelector(preserveCenter = false, silent = false) {
+      const b = this._imgBounds();
+      if (!b || !b.iw) return;
+      const ratio = this.currentSize.w / this.currentSize.h;
+      let prevCx = null, prevCy = null;
+      if (preserveCenter && this.sel.w > 0) {
+        prevCx = this.sel.l + this.sel.w / 2;
+        prevCy = this.sel.t + this.sel.h / 2;
+      }
+      let w, h;
+      if (b.iw / b.ih > ratio) { h = b.ih; w = h * ratio; }
+      else { w = b.iw; h = w / ratio; }
+      w = Math.min(w, b.iw); h = Math.min(h, b.ih);
+      let l = b.offX + (b.iw - w) / 2;
+      let t = b.offY + (b.ih - h) / 2;
+      if (prevCx !== null) {
+        l = prevCx - w / 2;
+        t = prevCy - h / 2;
+      }
+      this.sel = { l, t, w, h };
+      this._constrainSelector();
+      this._renderSelector();
+      if (!this._cornerHooked) this._hookSelectorDrag();
+    }
+
+    _constrainSelector() {
+      const b = this._imgBounds();
+      if (!b) return;
+      const ratio = this.currentSize.w / this.currentSize.h;
+      if (this.sel.w > b.iw) { this.sel.w = b.iw; this.sel.h = this.sel.w / ratio; }
+      if (this.sel.h > b.ih) { this.sel.h = b.ih; this.sel.w = this.sel.h * ratio; }
+      this.sel.l = clamp(this.sel.l, b.offX, b.offX + b.iw - this.sel.w);
+      this.sel.t = clamp(this.sel.t, b.offY, b.offY + b.ih - this.sel.h);
+    }
+
+    _renderSelector() {
+      const { selBox, cornerNw, cornerNe, cornerSw, cornerSe } = this.refs;
+      if (!selBox) return;
+      const { l, t, w, h } = this.sel;
+      const C = 11;
+      selBox.style.left = l + 'px';
+      selBox.style.top = t + 'px';
+      selBox.style.width = w + 'px';
+      selBox.style.height = h + 'px';
+      cornerNw.style.left = (l - C) + 'px'; cornerNw.style.top = (t - C) + 'px';
+      cornerNe.style.left = (l + w - C) + 'px'; cornerNe.style.top = (t - C) + 'px';
+      cornerSw.style.left = (l - C) + 'px'; cornerSw.style.top = (t + h - C) + 'px';
+      cornerSe.style.left = (l + w - C) + 'px'; cornerSe.style.top = (t + h - C) + 'px';
+    }
+
+    _hookSelectorDrag() {
+      this._cornerHooked = true;
+      const { selBox, stage } = this.refs;
+      let mode = null; /* 'move' or corner key */
+      let sx = 0, sy = 0, sL = 0, sT = 0, sW = 0, sH = 0;
+
+      const start = (target, clientX, clientY) => {
+        const corner = target.closest('[data-corner]');
+        if (corner) mode = corner.dataset.corner;
+        else if (target === selBox || selBox.contains(target)) mode = 'move';
+        else return false;
+        sx = clientX; sy = clientY;
+        sL = this.sel.l; sT = this.sel.t; sW = this.sel.w; sH = this.sel.h;
+        return true;
+      };
+
+      const move = (clientX, clientY) => {
+        if (!mode) return;
+        const dx = clientX - sx;
+        const dy = clientY - sy;
+        if (mode === 'move') {
+          this.sel.l = sL + dx;
+          this.sel.t = sT + dy;
+        } else {
+          const b = this._imgBounds();
+          const ratio = this.currentSize.w / this.currentSize.h;
+          const MIN = 60;
+          let nL = sL, nT = sT, nW = sW;
+          if (mode === 'se' || mode === 'ne') nW = sW + dx;
+          else if (mode === 'sw' || mode === 'nw') { nW = sW - dx; nL = sL + sW - nW; }
+          nW = Math.max(MIN, nW);
+          let nH = nW / ratio;
+          if (mode === 'nw' || mode === 'ne') nT = sT + sH - nH;
+          if (nW > b.iw) { nW = b.iw; nH = nW / ratio; }
+          if (nH > b.ih) { nH = b.ih; nW = nH * ratio; }
+          this.sel = { l: nL, t: nT, w: nW, h: nH };
+        }
+        this._constrainSelector();
+        this._renderSelector();
+      };
+
+      const end = () => { mode = null; };
+
+      stage.addEventListener('mousedown', (e) => {
+        if (start(e.target, e.clientX, e.clientY)) e.preventDefault();
+      });
+      window.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+      window.addEventListener('mouseup', end);
+
+      stage.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        if (start(e.target, t.clientX, t.clientY)) e.preventDefault();
+      }, { passive: false });
+      stage.addEventListener('touchmove', (e) => {
+        const t = e.touches[0];
+        if (mode) { e.preventDefault(); move(t.clientX, t.clientY); }
+      }, { passive: false });
+      stage.addEventListener('touchend', end);
+    }
+
+    _captureCrop() {
+      const b = this._imgBounds();
+      const img = this.refs.fullImg;
+      if (!b || !img) return;
+      const nW = img.naturalWidth || 1, nH = img.naturalHeight || 1;
+      const x = Math.max(0, Math.round((this.sel.l - b.offX) / b.sc));
+      const y = Math.max(0, Math.round((this.sel.t - b.offY) / b.sc));
+      const w = Math.min(nW - x, Math.max(1, Math.round(this.sel.w / b.sc)));
+      const h = Math.min(nH - y, Math.max(1, Math.round(this.sel.h / b.sc)));
+      this.capturedCrop = { x, y, w, h };
+    }
+
+    /* ── Framed preview render ── */
+    _renderPreview() {
+      const { frameInner, artwork, fullImg, frameWrap } = this.refs;
+      if (!frameInner || !artwork || !fullImg) return;
+      const stage = frameWrap;
+      const sw = stage.offsetWidth, sh = stage.offsetHeight;
+      const ins = this.moldInset;
+      const xFrac = 1 - ins.l - ins.r;
+      const yFrac = 1 - ins.t - ins.b;
+      const frameRatio = (this.currentSize.w / this.currentSize.h) * (yFrac / xFrac);
+
+      let w = sw * 0.86;
+      let h = w / frameRatio;
+      if (h > sh * 0.92) { h = sh * 0.92; w = h * frameRatio; }
+      const W = Math.round(w), H = Math.round(h);
+      frameInner.style.width = W + 'px';
+      frameInner.style.height = H + 'px';
+
+      const cL = Math.round(W * ins.l);
+      const cT = Math.round(H * ins.t);
+      const cW = Math.round(W * (1 - ins.l - ins.r));
+      const cH = Math.round(H * (1 - ins.t - ins.b));
+      const dpr = window.devicePixelRatio || 1;
+      artwork.style.left = cL + 'px';
+      artwork.style.top = cT + 'px';
+      artwork.style.width = cW + 'px';
+      artwork.style.height = cH + 'px';
+      artwork.width = Math.round(cW * dpr);
+      artwork.height = Math.round(cH * dpr);
+      const ctx = artwork.getContext('2d');
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      const cp = this.capturedCrop;
+      if (cp && cp.w > 0 && cp.h > 0) {
+        ctx.drawImage(fullImg, cp.x, cp.y, cp.w, cp.h, 0, 0, cW, cH);
+      } else {
+        ctx.drawImage(fullImg, 0, 0, fullImg.naturalWidth, fullImg.naturalHeight, 0, 0, cW, cH);
+      }
+    }
+
+    /* ── Form integration (line-item property) ── */
+    _injectFormHooks() {
+      /* Find the buy-buttons product form within the same section, attach a hidden
+       * input that we'll keep up to date with the final Cloudinary URL (with crop). */
+      const root = this.closest('.shopify-section') || document;
+      const form = root.querySelector('form[id^="BuyButtons-ProductForm"]');
+      if (!form) return;
+      this._form = form;
+
+      let hidden = form.querySelector('input[name="properties[Imagem personalizada]"]');
+      if (!hidden) {
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'properties[Imagem personalizada]';
+        hidden.value = '';
+        form.appendChild(hidden);
+      }
+      this._hiddenInput = hidden;
+
+      /* Block submit when no image is ready, or wait for the upload to finish. */
+      form.addEventListener(
+        'submit',
+        async (e) => {
+          if (this.state === 'preview' && this.cloudinaryUrl && this.capturedCrop) {
+            this._updateHiddenInput();
+            return;
+          }
+          if (!this.objectUrl) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this._showError('Envie sua imagem antes de adicionar ao carrinho.');
+            this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+          if (this.state === 'cropping') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this._showError('Confirme o enquadramento antes de adicionar ao carrinho.');
+            return;
+          }
+          if (!this.cloudinaryUrl) {
+            /* Image is still uploading — wait for it. */
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this._setStatus('Aguarde o envio da imagem terminar…');
+            try {
+              await this.uploadPromise;
+              this._updateHiddenInput();
+              /* Re-dispatch a synthetic submit so product-form-component handles it. */
+              this._form.requestSubmit();
+            } catch {
+              /* error already shown */
+            }
+          }
+        },
+        { capture: true }
+      );
+    }
+
+    _updateHiddenInput() {
+      if (!this._hiddenInput) return;
+      if (!this.cloudinaryUrl) {
+        this._hiddenInput.value = '';
+        return;
+      }
+      const cp = this.capturedCrop;
+      let url = this.cloudinaryUrl;
+      const img = this.refs.fullImg;
+      const nW = img?.naturalWidth || 0, nH = img?.naturalHeight || 0;
+      const isFullCover = cp && cp.x === 0 && cp.y === 0 && cp.w >= nW && cp.h >= nH;
+      if (cp && cp.w > 0 && cp.h > 0 && !isFullCover) {
+        const transform = `c_crop,x_${cp.x},y_${cp.y},w_${cp.w},h_${cp.h}`;
+        url = url.replace('/upload/', `/upload/${transform}/`);
+      }
+      this._hiddenInput.value = url;
+    }
+
+    /* ── Feedback ── */
+    _showError(msg) {
+      const el = this.refs.error;
+      if (!el) return;
+      el.textContent = msg;
+      el.hidden = !msg;
+    }
+    _clearError() { this._showError(''); }
+    _setStatus(msg) {
+      const el = this.refs.status;
+      if (!el) return;
+      el.textContent = msg;
+      el.hidden = !msg;
+    }
+  }
+
+  if (!customElements.get('personalizados-canvas')) {
+    customElements.define('personalizados-canvas', PersonalizadosCanvas);
+  }
+</script>

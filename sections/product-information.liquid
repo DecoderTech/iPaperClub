@@ -11,6 +11,11 @@
   if closest.product.media.size == 0
     assign product_has_media = false
   endif
+  # Personalized-frame product builds its own preview in the media slot, so force
+  # the media column to render even when the admin product has zero images uploaded.
+  if closest.product.handle == 'quadro-personalizado'
+    assign product_has_media = true
+  endif
 
   assign product_grid_class = 'product-information__grid'
 

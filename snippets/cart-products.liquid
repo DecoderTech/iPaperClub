@@ -140,11 +140,11 @@
 
                   {%- if frame_name != nil -%}
                     {%- liquid
-                      assign moldura_file = 'moldura_white_fixed.png'
+                      assign moldura_url = 'https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_white.png?v=1768429538'
                       if frame_name contains 'Preta'
-                        assign moldura_file = 'moldura_black_fixed.png'
+                        assign moldura_url = 'https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_black.png?v=1768429549'
                       elsif frame_name contains 'Madeira'
-                        assign moldura_file = 'moldura_oak_fixed.png'
+                        assign moldura_url = 'https://cdn.shopify.com/s/files/1/0665/4636/8579/files/moldura_oak.png?v=1768429562'
                       endif
 
                       assign pz_ratio = 0.758
@@ -166,7 +166,7 @@
                     {%- if artwork_src != nil -%}
                       <a href="{{ item.url }}" class="cart-items__media-container" style="--ratio: {{ pz_ratio }};">
                         <img src="{{ artwork_src }}" alt="{{ item.product.title | escape }}" class="cart-items__pz-artwork" loading="lazy">
-                        <img src="{{ moldura_file | asset_url }}" alt="" class="cart-items__pz-moldura" aria-hidden="true" loading="lazy">
+                        <img src="{{ moldura_url }}" alt="" class="cart-items__pz-moldura" aria-hidden="true" loading="lazy">
                       </a>
                     {%- endif -%}
                   {%- elsif item.image -%}

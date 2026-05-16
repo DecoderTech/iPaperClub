@@ -1,0 +1,22 @@
+{%- comment -%}
+  Legacy URL: redirects to the new personalized-frame product page.
+  Kept so that bookmarked /pages/personalizados links and existing menu entries
+  keep working until they're updated in the admin. `layout none` bypasses theme.liquid
+  so the page is a tiny standalone shell that redirects immediately.
+{%- endcomment -%}
+{% layout none %}
+{%- assign redirect_url = '/products/quadro-personalizado' -%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ page.title | default: 'Quadro Personalizado' }}</title>
+    <meta name="robots" content="noindex">
+    <meta http-equiv="refresh" content="0; url={{ redirect_url }}">
+    <link rel="canonical" href="{{ redirect_url }}">
+    <script>window.location.replace({{ redirect_url | json }});</script>
+  </head>
+  <body>
+    <p>Redirecionando para <a href="{{ redirect_url }}">{{ redirect_url }}</a>…</p>
+  </body>
+</html>

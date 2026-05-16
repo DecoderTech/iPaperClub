@@ -2,6 +2,14 @@
 
 {% assign block_settings = block.settings %}
 
+{%- comment -%}
+  Personalized-frame product: swap the standard media gallery for the upload-and-crop
+  canvas. The right column (variant picker, buy buttons, etc.) keeps working normally.
+{%- endcomment -%}
+{%- if closest.product.handle == 'quadro-personalizado' -%}
+  {% render 'personalizados-canvas', product: closest.product %}
+{%- else -%}
+
 {%- if block_settings.zoom -%}
   <script
     src="{{ 'zoom-dialog.js' | asset_url }}"
@@ -724,6 +732,8 @@
     </script>
   {%- endif -%}
 </media-gallery>
+
+{%- endif -%}
 
 {% stylesheet %}
   .dialog-zoomed-gallery {
