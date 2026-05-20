@@ -670,7 +670,7 @@
               "type": "text",
               "name": "t:names.caption",
               "settings": {
-                "text": "<p>MAIS VENDIDOS</p>",
+                "text": "",
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
@@ -735,7 +735,7 @@
                   "type": "text",
                   "name": "t:names.heading",
                   "settings": {
-                    "text": "<h2>COLEÇÃO FIM DE ANO</h2>",
+                    "text": "<p>collection essentielle</p>",
                     "width": "fit-content",
                     "max_width": "normal",
                     "alignment": "left",
@@ -760,7 +760,7 @@
                 "text_VKigrJ": {
                   "type": "text",
                   "settings": {
-                    "text": "<p>Decore seu espaço para noites aconchegantes e para receber visitas durante as festas de fim de ano.<br/><br/></p>",
+                    "text": "<p><br/>Decore seu espaço com quadros que contam quem você é, para todo dia e para todo momento.<br/><br/></p>",
                     "width": "fit-content",
                     "max_width": "narrow",
                     "alignment": "left",
