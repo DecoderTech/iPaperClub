@@ -16,6 +16,12 @@
         {%- content_for 'block', id: 'cart-page-title', type: '_cart-title' %}
       </div>
 
+      {%- unless cart.empty? -%}
+        <div class="cart-page__shipping-bar">
+          {%- render 'free-shipping-bar' -%}
+        </div>
+      {%- endunless -%}
+
       <div class="cart-page__items">
         {%- content_for 'block', id: 'cart-page-items', type: '_cart-products' %}
       </div>
